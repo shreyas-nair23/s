@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SILAI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        <span class="logo-icon">✦</span>
+        SILAI
+    </div>
+
+    <div class="location">
+        <span>📍</span>
+        <div>
+            <small>Deliver to</small>
+            <strong>Bangalore</strong>
+        </div>
+    </div>
+
+    <div class="nav-search">
+        <span>⌕</span>
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search stitching, alteration, tailors..."
+        >
+    </div>
+
+    <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#tailors">Tailors</a>
+        <a href="#orders" class="nav-orders-link">
+            Orders
+            <span class="nav-order-badge" id="navOrderBadge" style="display:none">0</span>
+        </a>
+        <!-- a href="tailor-dashboard.html" class="nav-tailor-link">✂️ Tailor Dashboard</a -->
+    </div>
+
+    <!--Logged OUT-->
+    <div class="nav-auth" id="navAuth">
+        <button class="nav-login-btn" onclick="openAuth('login')">Log in</button>
+        <button class="nav-signup-btn" onclick="openAuth('signup')">Sign up</button>
+    </div>
+
+    <!-- Logged IN-->
+    <div class="nav-user" id="navUser" style="display:none;">
+        <span class="nav-role-badge" id="navRoleBadge"></span>
+        <button class="profile-btn" id="profileBtn" onclick="toggleUserMenu()">
+            <span id="navInitial">👤</span>
+        </button>
+        <div class="user-menu" id="userMenu">
+            <div class="user-menu-info">
+                <strong id="menuName"></strong>
+                <small id="menuEmail"></small>
+            </div>
+            <hr class="menu-divider">
+            <button class="menu-item" onclick="handleLogout()">Log out</button>
+        </div>
+    </div>
+
+</nav>
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-badge">
+            <span>✦</span>
+            AI-POWERED TAILORING
+        </div>
+
+        <h1>
+            Your clothes.
+            <br>
+            <em>Perfectly fitted.</em>
+        </h1>
+
+        <p>
+            Find trusted tailors, get alterations and create
+            custom outfits — all from one place.
+        </p>
+
+        <div class="hero-buttons">
+
+            <button class="primary-btn" onclick="openAI()">
+                <span>✦</span>
+                Ask AI Tailor
+            </button>
+
+            <button class="secondary-btn" onclick="scrollToServices()">
+                Explore services
+                <span>→</span>
+            </button>
+
+        </div>
+
+        <div class="hero-stats">
+
+            <div>
+                <strong>500+</strong>
+                <span>Tailors</span>
+            </div>
+
+            <div>
+                <strong>4.8★</strong>
+                <span>Average rating</span>
+            </div>
+
+            <div>
+                <strong>2 hrs</strong>
+                <span>Fastest delivery</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-visual">
+
+        <div class="floating-card card-one">
+            <span class="floating-icon">✂</span>
+            <div>
+                <strong>Alteration</strong>
+                <small>From ₹99</small>
+            </div>
+        </div>
+
+        <div class="fashion-card">
+
+            <div class="fashion-pattern">
+                <div class="thread-line"></div>
+
+                <div class="dress-shape">
+                    <div class="dress-neck"></div>
+                    <div class="dress-body"></div>
+                </div>
+            </div>
+
+            <div class="fashion-label">
+                <span>AI STYLE MATCH</span>
+                <strong>98% Match</strong>
+            </div>
+
+        </div>
+
+        <div class="floating-card card-two">
+            <span class="check">✓</span>
+            <div>
+                <strong>Tailor found</strong>
+                <small>1.2 km away</small>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     AI BANNER
+========================================================= -->
+
+<section class="ai-section">
+
+    <div class="ai-box">
+
+        <div class="ai-left">
+
+            <div class="ai-symbol">✦</div>
+
+            <div>
+                <span class="section-label">MEET YOUR AI TAILOR</span>
+
+                <h2>
+                    Don't know what you need?
+                    <br>
+                    <em>Just tell us.</em>
+                </h2>
+
+                <p>
+                    Describe your outfit or upload a reference.
+                    SILAI's AI recommends the right service and tailor.
+                </p>
+            </div>
+
+        </div>
+
+        <button class="white-btn" onclick="openAI()">
+            Try AI Tailor
+            <span>→</span>
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SERVICES
+========================================================= -->
+
+<section class="section" id="services">
+
+    <div class="section-heading">
+
+        <div>
+            <span class="section-label">WHAT DO YOU NEED?</span>
+
+            <h2>
+                Tailoring,
+                <em>made simple.</em>
+            </h2>
+        </div>
+
+        <button class="view-btn">
+            View all →
+        </button>
+
+    </div>
+
+
+    <div class="service-grid">
+
+        <div class="service-card" onclick="selectService('Stitching')">
+            <div class="service-image stitching">
+                <span>🧵</span>
+            </div>
+
+            <div class="service-info">
+                <h3>New Stitching</h3>
+                <p>Custom outfits from scratch</p>
+                <strong>From ₹399</strong>
+            </div>
+        </div>
+
+
+        <div class="service-card" onclick="selectService('Alteration')">
+            <div class="service-image alteration">
+                <span>✂️</span>
+            </div>
+
+            <div class="service-info">
+                <h3>Alterations</h3>
+                <p>Perfect fit, every time</p>
+                <strong>From ₹99</strong>
+            </div>
+        </div>
+
+
+        <div class="service-card" onclick="selectService('Blouse')">
+            <div class="service-image blouse">
+                <span>👗</span>
+            </div>
+
+            <div class="service-info">
+                <h3>Blouse Stitching</h3>
+                <p>Traditional to contemporary</p>
+                <strong>From ₹499</strong>
+            </div>
+        </div>
+
+
+        <div class="service-card" onclick="selectService('Repair')">
+            <div class="service-image repair">
+                <span>🪡</span>
+            </div>
+
+            <div class="service-info">
+                <h3>Repairs</h3>
+                <p>Fix, restore & refresh</p>
+                <strong>From ₹79</strong>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     TAILORS
+========================================================= -->
+
+<section class="section tailor-section" id="tailors">
+
+    <div class="section-heading">
+
+        <div>
+            <span class="section-label">TOP TAILORS NEAR YOU</span>
+
+            <h2>
+                Meet your
+                <em>stitching experts.</em>
+            </h2>
+        </div>
+
+        <button class="view-btn">
+            See all →
+        </button>
+
+    </div>
+
+
+    <div class="tailor-grid" id="tailorGrid">
+        <div class="tailor-loading">Loading tailors...</div>
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     HOW IT WORKS
+========================================================= -->
+
+<section class="how-section">
+
+    <div class="how-header">
+
+        <span class="section-label">HOW SUI WORKS</span>
+
+        <h2>
+            From idea to
+            <em>perfect fit.</em>
+        </h2>
+
+    </div>
+
+
+    <div class="steps">
+
+        <div class="step">
+
+            <div class="step-number">01</div>
+
+            <div>
+                <h3>Tell us what you need</h3>
+                <p>
+                    Choose a service or simply describe
+                    your requirement to our AI.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">02</div>
+
+            <div>
+                <h3>Get matched</h3>
+                <p>
+                    Our system finds the best tailor
+                    based on your needs and location.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">03</div>
+
+            <div>
+                <h3>Book & relax</h3>
+                <p>
+                    Schedule pickup and delivery.
+                    Your outfit comes back perfectly fitted.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ORDERS
+========================================================= -->
+
+<!-- =========================================================
+     ORDERS
+========================================================= -->
+
+<section class="section order-section" id="orders">
+
+    <div class="section-heading">
+        <div>
+            <span class="section-label">YOUR ORDERS</span>
+            <h2>Track your <em>stitching.</em></h2>
+        </div>
+    </div>
+
+    <!-- Shown when not logged in -->
+    <div class="orders-login-prompt" id="ordersLoginPrompt" style="display:none;">
+        <p>Log in to see your orders.</p>
+        <button class="primary-btn" onclick="openAuth('login')">Log in →</button>
+    </div>
+
+    <!-- Order list -->
+    <div class="customer-orders-list" id="customerOrdersList"></div>
+
+</section>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+    <div class="footer-top">
+
+        <div class="footer-brand">
+
+            <div class="logo">
+                <span class="logo-icon">✦</span>
+                SUI
+            </div>
+
+            <p>
+                AI-powered tailoring,
+                made effortless.
+            </p>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Explore</h4>
+
+            <a href="#services">Services</a>
+            <a href="#tailors">Tailors</a>
+            <a href="#orders">Orders</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>For Tailors</h4>
+
+            <a href="tailor-dashboard.html">Tailor Dashboard</a>
+            <a href="#">Join SUI</a>
+            <a href="#">Partner with us</a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Help</h4>
+
+            <a href="#">Support</a>
+            <a href="#">FAQs</a>
+            <a href="#">Contact</a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <span>© 2026 SUI</span>
+
+        <span>Made with ✦ for better fits.</span>
+
+    </div>
+
+</footer>
+
+
+<!-- =========================================================
+     AI MODAL
+========================================================= -->
+
+<div class="modal-overlay" id="aiModal">
+
+    <div class="ai-modal">
+
+        <button class="close-btn" onclick="closeAI()">×</button>
+
+        <div class="modal-icon">✦</div>
+
+        <span class="section-label">SILAI AI</span>
+
+        <h2>
+            What can I help you
+            <em>stitch?</em>
+        </h2>
+
+        <p>
+            Tell me about your outfit, alteration
+            or design idea.
+        </p>
+
+
+        <div class="chat-area" id="chatArea">
+
+            <div class="ai-message">
+                Hi! 👋 I'm your AI Tailor.
+                What would you like to get stitched or altered?
+            </div>
+
+        </div>
+
+
+        <div class="ai-input">
+
+            <input
+                type="text"
+                id="aiInput"
+                placeholder="e.g. My kurti is too loose..."
+                onkeydown="handleAIKey(event)"
+            >
+
+            <button onclick="sendAI()">
+                →
+            </button>
+
+        </div>
+
+
+        <div class="ai-suggestions">
+
+            <button onclick="quickAI('I need a blouse stitched')">
+                👗 Blouse
+            </button>
+
+            <button onclick="quickAI('I need alteration')">
+                ✂️ Alteration
+            </button>
+
+            <button onclick="quickAI('I want a custom outfit')">
+                ✨ Custom outfit
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SHOP CLOSED MODAL
+========================================================= -->
+
+<div class="modal-overlay" id="shopClosedModal">
+    <div class="shop-closed-modal">
+        <button class="close-btn" onclick="closeShopClosed()">×</button>
+        <div class="shop-closed-icon" id="shopClosedIcon">🔒</div>
+        <span class="section-label" id="shopClosedName">Shop name</span>
+        <h2 id="shopClosedLine1">Shop is Closed</h2>
+        <p id="shopClosedLine2">Check back later.</p>
+        <div class="shop-closed-actions">
+            <button class="primary-btn" onclick="closeShopClosed()">Got it</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     BOOKING MODAL
+========================================================= -->
+
+<div class="modal-overlay" id="bookingModal">
+
+    <div class="booking-modal">
+
+        <button class="close-btn" onclick="closeBooking()">×</button>
+
+        <span class="section-label">PLACE AN ORDER</span>
+
+        <h2 id="bookingTitle">Book Tailor</h2>
+        <p id="bookingSubtitle" style="color:#858179;font-size:13px;margin-bottom:20px;"></p>
+
+        <!-- SERVICE CHIPS -->
+        <div class="bk-section-label">What do you need?</div>
+        <div class="bk-chips">
+            <button class="bk-service-chip active" data-service="Alteration"    onclick="selectServiceChip(this)">✂️ Alteration</button>
+            <button class="bk-service-chip"        data-service="New Stitching" onclick="selectServiceChip(this)">🧵 New Stitching</button>
+            <button class="bk-service-chip"        data-service="Blouse"        onclick="selectServiceChip(this)">👗 Blouse</button>
+            <button class="bk-service-chip"        data-service="Custom Design" onclick="selectServiceChip(this)">✨ Custom Design</button>
+            <button class="bk-service-chip"        data-service="Repair"        onclick="selectServiceChip(this)">🪡 Repair</button>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="field-group" style="margin-top:18px;">
+            <label>Describe what you need <span style="color:#e64c2b">*</span></label>
+            <textarea id="bkDescription" rows="3"
+                placeholder="e.g. I need a kurti stitched in navy blue, fitted at the waist..."></textarea>
+        </div>
+
+        <!-- MEASUREMENTS (optional) -->
+        <div class="field-group">
+            <label>Measurements <span style="color:#858179;font-weight:400;">(optional)</span></label>
+            <textarea id="bkMeasurements" rows="2"
+                placeholder="e.g. Chest 36, Waist 30, Length 42 inches..."></textarea>
+        </div>
+
+        <div class="auth-error" id="bkError"></div>
+
+        <button class="primary-btn bk-submit-btn" id="bkSubmitBtn" onclick="submitOrder()">
+            Place Order →
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <p id="toastText">Done!</p>
+</div>
+
+
+<!-- =========================================================
+     AUTH MODAL
+========================================================= -->
+
+<div class="modal-overlay" id="authModal">
+    <div class="auth-modal">
+
+        <button class="close-btn" onclick="closeAuth()">×</button>
+
+        <!-- ROLE SELECTOR -->
+        <div class="auth-step" id="stepRole">
+
+            <div class="modal-icon">✦</div>
+            <span class="section-label">WELCOME TO SILAI</span>
+            <h2>Who are <em>you?</em></h2>
+            <p>Choose how you'd like to continue.</p>
+
+            <div class="role-cards">
+                <button class="role-card" onclick="selectRole('customer')">
+                    <span class="role-icon">🛍️</span>
+                    <strong>I'm a Customer</strong>
+                    <small>Order tailoring services</small>
+                </button>
+                <button class="role-card" onclick="selectRole('tailor')">
+                    <span class="role-icon">✂️</span>
+                    <strong>I'm a Tailor</strong>
+                    <small>Offer my tailoring services</small>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="auth-step" id="stepLogin" style="display:none;">
+
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <div class="modal-icon">✦</div>
+            <span class="section-label" id="loginRoleLabel">CUSTOMER LOGIN</span>
+            <h2>Welcome <em>back.</em></h2>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Log in</button>
+                <button class="auth-tab" onclick="switchTab('signup')">Sign up</button>
+            </div>
+
+            <!-- LOGIN FIELDS -->
+            <div id="loginFields">
+                <div class="field-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="you@email.com">
+                </div>
+                <div class="field-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Your password">
+                </div>
+                <div class="auth-error" id="loginError"></div>
+                <button class="primary-btn auth-submit-btn" onclick="handleLogin()">
+                    Log in →
+                </button>
+            </div>
+
+            <!-- SIGNUP FIELDS -->
+            <div id="signupFields" style="display:none;">
+                <div class="field-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="Your name">
+                </div>
+                <div class="field-group">
+                    <label>Email</label>
+                    <input type="email" id="signupEmail" placeholder="you@email.com">
+                </div>
+                <div class="field-group">
+                    <label>Phone</label>
+                    <input type="tel" id="signupPhone" placeholder="10-digit number">
+                </div>
+
+                <!-- Tailor-only fields -->
+                <div id="tailorFields" style="display:none;">
+                    <div class="field-group">
+                        <label>Shop / Studio Name</label>
+                        <input type="text" id="signupShop" placeholder="e.g. Meera Studio">
+                    </div>
+                    <div class="field-group">
+                        <label>Specialty</label>
+                        <select id="signupSpecialty">
+                            <option value="">Select specialty</option>
+                            <option>Women's Tailoring</option>
+                            <option>Men's Tailoring</option>
+                            <option>Bridal & Ethnic</option>
+                            <option>Alterations</option>
+                            <option>Custom Design</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Min. 6 characters">
+                </div>
+                <div class="auth-error" id="signupError"></div>
+                <button class="primary-btn auth-submit-btn" onclick="handleSignup()">
+                    Create account →
+                </button>
+            </div>
+
+            <div class="auth-divider"><span>or</span></div>
+
+            <button class="google-btn" onclick="handleGoogleAuth()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18">
+                Continue with Google
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+
+<script type="module">
+
+    /* =====================================================
+       FIREBASE INIT
+    ===================================================== */
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signInWithPopup,
+        GoogleAuthProvider,
+        signOut,
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+        getFirestore,
+        doc,
+        setDoc,
+        getDoc,
+        collection,
+        getDocs,
+        addDoc,
+        query,
+        where,
+        onSnapshot,
+        updateDoc,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMmAyMoN2PTo9iEoEeDDz20hMkXVEf9pc",
+        authDomain: "silai-455c4.firebaseapp.com",
+        projectId: "silai-455c4",
+        storageBucket: "silai-455c4.firebasestorage.app",
+        messagingSenderId: "331357923395",
+        appId: "1:331357923395:web:c096d633f70a30be34ccf6"
+    };
+
+    const app        = initializeApp(firebaseConfig);
+    const auth       = getAuth(app);
+    const db         = getFirestore(app);
+    const provider   = new GoogleAuthProvider();
+
+    // All loaded tailor docs — used for filtering
+    let allTailors = [];
+    // Currently logged-in customer data
+    let currentUser = null;
+    let currentCustomerData = {};
+
+    // Show login prompt in orders section on initial load
+    renderCustomerOrders(null);
+
+    loadTailors();
+
+    async function loadTailors() {
+        const grid = document.getElementById("tailorGrid");
+        if (!grid) return;
+
+        try {
+            // Live listener — re-renders cards whenever any tailor doc changes
+            // (isOpen toggle, vacation dates, profile edits all propagate instantly)
+            onSnapshot(collection(db, "tailors"), (snapshot) => {
+                allTailors = snapshot.docs.map(tailorDoc => ({
+                    id: tailorDoc.id,
+                    ...tailorDoc.data()
+                }));
+                // Preserve any active category filter
+                const banner = document.getElementById("filterBanner");
+                if (banner) {
+                    // Re-apply the current filter against fresh data
+                    const activeService = banner.dataset.service;
+                    const matchSpecialties = SERVICE_MAP[activeService];
+                    if (matchSpecialties) {
+                        const filtered = allTailors.filter(t =>
+                            matchSpecialties.some(s =>
+                                (t.specialty || "").toLowerCase().includes(s.toLowerCase())
+                            )
+                        );
+                        renderTailors(filtered);
+                        return;
+                    }
+                }
+                renderTailors(allTailors);
+            }, (error) => {
+                grid.innerHTML = "<p class=\"tailor-empty\">Tailors are unavailable right now.</p>";
+                console.error("Tailor directory loading failed:", error);
+            });
+        } catch (error) {
+            grid.innerHTML = "<p class=\"tailor-empty\">Tailors are unavailable right now.</p>";
+            console.error("Tailor directory loading failed:", error);
+        }
+    }
+
+    function renderTailors(tailors) {
+        const grid = document.getElementById("tailorGrid");
+        if (!tailors.length) {
+            grid.innerHTML = "<p class=\"tailor-empty\">No tailors found for this category.</p>";
+            return;
+        }
+
+        grid.innerHTML = tailors.map((tailor, index) => {
+            const name      = escapeHTML(tailor.shop || tailor.name || "Tailor");
+            const specialty = escapeHTML(tailor.specialty || "Tailoring");
+            const location  = escapeHTML(tailor.location || "Location not added");
+            const price     = Number(tailor.startingPrice || tailor.price || 150);
+            const rating    = Number(tailor.rating || 0);
+            const photoClass = ["photo-one", "photo-two", "photo-three"][index % 3];
+            const tailorId   = escapeHTML(tailor.id);
+
+            // Availability indicator
+            const unavail = getShopUnavailableMessage(tailor);
+            const statusDot = unavail
+                ? `<span class="tailor-status-dot closed" title="${unavail.line1}"></span>`
+                : `<span class="tailor-status-dot open"   title="Open now"></span>`;
+            const bookBtnLabel = unavail ? "Closed" : "Book Tailor";
+            const vacationTag  = (tailor.vacationStart && tailor.vacationEnd && new Date().toISOString().slice(0,10) >= tailor.vacationStart && new Date().toISOString().slice(0,10) <= tailor.vacationEnd)
+                ? `<span class="tailor-vacation-tag">🏖️ On vacation</span>` : "";
+
+            return `
+                <div class="tailor-card">
+                    <div class="tailor-photo ${photoClass}" id="tphoto-${tailorId}">
+                        <span class="verified">✓</span>
+                        ${statusDot}
+                    </div>
+                    <div class="tailor-content">
+                        <div class="tailor-title">
+                            <div>
+                                <h3>${name}</h3>
+                                <span>${specialty}</span>
+                            </div>
+                            <div class="rating">${rating ? `★ ${rating.toFixed(1)}` : "New"}</div>
+                        </div>
+                        <div class="tailor-tags">
+                            <span>${specialty}</span>
+                            ${tailor.location ? `<span>📍 ${escapeHTML(tailor.location)}</span>` : ""}
+                            ${vacationTag}
+                        </div>
+                        <div class="tailor-bottom">
+                            <span>⏰ ${escapeHTML(tailor.openingTime || "9:00")}–${escapeHTML(tailor.closingTime || "19:00")}</span>
+                            <strong>From ₹${price.toLocaleString("en-IN")}</strong>
+                        </div>
+                        <button class="book-btn ${unavail ? 'book-btn-closed' : ''}" onclick="openBookingModal('${tailorId}')">
+                            ${bookBtnLabel}
+                        </button>
+                    </div>
+                </div>`;
+        }).join("");
+
+        // Apply photos
+        tailors.forEach((tailor) => {
+            if (tailor.photoURL) {
+                const el = document.getElementById("tphoto-" + tailor.id);
+                if (el) {
+                    el.style.backgroundImage  = `url("${String(tailor.photoURL).replace(/"/g, '\\"')}")`;
+                    el.style.backgroundSize   = "cover";
+                    el.style.backgroundPosition = "center";
+                }
+            }
+        });
+    }
+
+    /* =====================================================
+       SERVICE CATEGORY FILTERING
+    ===================================================== */
+
+    // Map display names → specialty values stored in Firestore
+    const SERVICE_MAP = {
+        "Stitching":  ["New Stitching", "Women's Tailoring", "Men's Tailoring", "Custom Design"],
+        "Alteration": ["Alterations", "Alteration"],
+        "Blouse":     ["Women's Tailoring", "Bridal & Ethnic", "Blouse Stitching"],
+        "Repair":     ["Alterations", "Alteration", "Repairs"],
+        "Custom":     ["Custom Design", "Bridal & Ethnic"],
+        "Bridal":     ["Bridal & Ethnic"],
+    };
+
+    window.selectService = function(service) {
+        const matchSpecialties = SERVICE_MAP[service];
+        const sectionLabel     = document.querySelector("#tailors .section-label");
+        const heading          = document.querySelector("#tailors h2");
+
+        if (matchSpecialties) {
+            const filtered = allTailors.filter(t =>
+                matchSpecialties.some(s =>
+                    (t.specialty || "").toLowerCase().includes(s.toLowerCase())
+                )
+            );
+            renderTailors(filtered);
+
+            // Update heading to reflect filter
+            if (sectionLabel) sectionLabel.textContent = `TAILORS FOR ${service.toUpperCase()}`;
+            if (heading) heading.innerHTML = `Tailors for <em>${service}.</em>`;
+
+            // Show clear filter button
+            showFilterBanner(service);
+        }
+
+        // Smooth scroll to tailors
+        document.getElementById("tailors").scrollIntoView({ behavior: "smooth" });
+    };
+
+    function showFilterBanner(service) {
+        let banner = document.getElementById("filterBanner");
+        if (!banner) {
+            banner = document.createElement("div");
+            banner.id = "filterBanner";
+            banner.className = "filter-banner";
+            document.getElementById("tailors").prepend(banner);
+        }
+        banner.dataset.service = service;
+        banner.innerHTML = `
+            <span>Showing tailors for <strong>${service}</strong></span>
+            <button onclick="clearFilter()">✕ Clear filter</button>`;
+    }
+
+    window.clearFilter = function() {
+        const sectionLabel = document.querySelector("#tailors .section-label");
+        const heading      = document.querySelector("#tailors h2");
+        if (sectionLabel) sectionLabel.textContent = "TOP TAILORS NEAR YOU";
+        if (heading)      heading.innerHTML = `Meet your <em>stitching experts.</em>`;
+        const banner = document.getElementById("filterBanner");
+        if (banner) banner.remove();
+        renderTailors(allTailors);
+    };
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>'\"]/g, character => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;"
+        }[character]));
+    }
+
+    /* =====================================================
+       SHOP AVAILABILITY HELPERS
+    ===================================================== */
+
+    const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+    function getShopUnavailableMessage(tailor) {
+        const now   = new Date();
+        const today = now.toISOString().slice(0, 10);
+
+        // 1. Vacation window — highest priority
+        if (tailor.vacationStart && tailor.vacationEnd && tailor.vacationEnd >= today) {
+            if (today >= tailor.vacationStart && today <= tailor.vacationEnd) {
+                const endDate    = new Date(tailor.vacationEnd);
+                const endStr     = endDate.toLocaleDateString("en-IN", { day: "numeric", month: "long" });
+                const reopenDate = new Date(tailor.vacationEnd);
+                reopenDate.setDate(reopenDate.getDate() + 1);
+                const reopenStr  = reopenDate.toLocaleDateString("en-IN", { day: "numeric", month: "long" });
+                return {
+                    type: "vacation",
+                    line1: "Taking a break",
+                    line2: `On vacation until ${endStr}. Back and accepting orders from ${reopenStr}.`
+                };
+            }
+        }
+
+        // 2. Manual isOpen toggle — if explicitly set to false, shop is closed
+        // isOpen can be: true (open), false (closed), or undefined (never set = treat as open)
+        if (tailor.isOpen === false) {
+            return {
+                type: "closed",
+                line1: "Shop is Closed",
+                line2: getNextOpenMessage(tailor, now)
+            };
+        }
+
+        // 3. Working hours / day — only check if tailor has set working days
+        // If workingDays is not set, skip this check (don't block unnecessarily)
+        if (tailor.workingDays && tailor.workingDays.length > 0 && tailor.openingTime && tailor.closingTime) {
+            const dayName   = DAY_NAMES[now.getDay()];
+            const [openH, openM]   = tailor.openingTime.split(":").map(Number);
+            const [closeH, closeM] = tailor.closingTime.split(":").map(Number);
+            const nowMins   = now.getHours() * 60 + now.getMinutes();
+            const openMins  = openH * 60 + openM;
+            const closeMins = closeH * 60 + closeM;
+
+            if (!tailor.workingDays.includes(dayName) || nowMins < openMins || nowMins >= closeMins) {
+                return {
+                    type: "closed",
+                    line1: "Shop is Closed",
+                    line2: getNextOpenMessage(tailor, now)
+                };
+            }
+        }
+
+        return null; // shop is open
+    }
+
+    function getNextOpenMessage(tailor, now) {
+        const workingDays = tailor.workingDays || ["Mon","Tue","Wed","Thu","Fri","Sat"];
+        const openTime    = tailor.openingTime || "09:00";
+        const closeTime   = tailor.closingTime || "19:00";
+
+        // Check if shop opens later today
+        const dayName  = DAY_NAMES[now.getDay()];
+        const [openH, openM]   = openTime.split(":").map(Number);
+        const [closeH, closeM] = closeTime.split(":").map(Number);
+        const nowMins   = now.getHours() * 60 + now.getMinutes();
+        const openMins  = openH * 60 + openM;
+        const closeMins = closeH * 60 + closeM;
+
+        if (workingDays.includes(dayName) && nowMins < openMins) {
+            return `Opens today at ${fmtTime(openTime)}.`;
+        }
+
+        // Find next working day
+        for (let i = 1; i <= 7; i++) {
+            const nextDate = new Date(now);
+            nextDate.setDate(now.getDate() + i);
+            const nextDay = DAY_NAMES[nextDate.getDay()];
+            if (workingDays.includes(nextDay)) {
+                const label = i === 1 ? "tomorrow" : nextDay;
+                return `Next open ${label} at ${fmtTime(openTime)}.`;
+            }
+        }
+
+        return `Working hours: ${fmtTime(openTime)} – ${fmtTime(closeTime)}.`;
+    }
+
+    function fmtTime(t) {
+        if (!t) return "";
+        const [h, m] = t.split(":").map(Number);
+        const suffix = h >= 12 ? "PM" : "AM";
+        const h12    = h % 12 || 12;
+        return `${h12}:${String(m).padStart(2, "0")} ${suffix}`;
+    }
+
+    function showShopClosedModal(tailor, msg) {
+        const shopName = tailor.shop || tailor.name || "This shop";
+        const icon = msg.type === "vacation" ? "🏖️" : "🔒";
+        document.getElementById("shopClosedName").textContent = shopName;
+        document.getElementById("shopClosedIcon").textContent = icon;
+        document.getElementById("shopClosedLine1").textContent = msg.line1;
+        document.getElementById("shopClosedLine2").textContent = msg.line2;
+        document.getElementById("shopClosedModal").classList.add("show");
+    }
+
+    window.closeShopClosed = function() {
+        document.getElementById("shopClosedModal").classList.remove("show");
+    };
+
+    /* =====================================================
+       CUSTOMER ORDERS — LIVE LISTENER
+    ===================================================== */
+
+    let ordersUnsubscribe = null;
+
+    function listenToCustomerOrders(uid) {
+        // Detach any previous listener
+        if (ordersUnsubscribe) { ordersUnsubscribe(); ordersUnsubscribe = null; }
+
+        const q = query(
+            collection(db, "orders"),
+            where("customerId", "==", uid)
+        );
+
+        ordersUnsubscribe = onSnapshot(q, (snap) => {
+            const orders = snap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => {
+                    // Sort newest first using createdAt timestamp
+                    const ta = a.createdAt?.toMillis?.() || 0;
+                    const tb = b.createdAt?.toMillis?.() || 0;
+                    return tb - ta;
+                });
+            renderCustomerOrders(orders);
+        }, (err) => {
+            console.error("Customer orders listener:", err);
+        });
+    }
+
+    function renderCustomerOrders(orders) {
+        const list        = document.getElementById("customerOrdersList");
+        const loginPrompt = document.getElementById("ordersLoginPrompt");
+        if (!list) return;
+
+        // Not logged in
+        if (orders === null) {
+            loginPrompt.style.display = "block";
+            list.innerHTML = "";
+            return;
+        }
+        loginPrompt.style.display = "none";
+
+        // Update nav badge — show count of pending + in-progress
+        const activeCount = orders.filter(o => o.status === "pending" || o.status === "in-progress").length;
+        const badge = document.getElementById("navOrderBadge");
+        if (badge) {
+            badge.textContent   = activeCount;
+            badge.style.display = activeCount > 0 ? "inline-flex" : "none";
+        }
+
+        if (!orders.length) {
+            list.innerHTML = `
+                <div class="cust-orders-empty">
+                    <div class="cust-orders-empty-icon">🧵</div>
+                    <h3>No orders yet</h3>
+                    <p>Book a tailor to get started.</p>
+                    <button class="primary-btn" onclick="document.getElementById('tailors').scrollIntoView({behavior:'smooth'})">
+                        Find a Tailor →
+                    </button>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = orders.map(o => buildOrderCard(o)).join("");
+    }
+
+    const STATUS_CONFIG = {
+        "pending":     { cls: "orange", label: "Pending",     icon: "⏳", desc: "Waiting for tailor to accept" },
+        "in-progress": { cls: "blue",   label: "In Progress", icon: "✂️", desc: "Your tailor is working on it" },
+        "completed":   { cls: "green",  label: "Completed",   icon: "✓",  desc: "Ready for pickup / delivered" },
+        "cancelled":   { cls: "red",    label: "Rejected",    icon: "✕",  desc: "The tailor couldn't take this order" },
+    };
+
+    function buildOrderCard(o) {
+        const cfg      = STATUS_CONFIG[o.status] || { cls: "grey", label: o.status, icon: "•", desc: "" };
+        const dateStr  = o.createdAt?.toDate
+            ? o.createdAt.toDate().toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" })
+            : (o.date || "—");
+        const amount   = o.amount ? "₹" + Number(o.amount).toLocaleString("en-IN") : "";
+
+        // Rating UI — only for completed orders
+        let ratingHtml = "";
+        if (o.status === "completed") {
+            if (o.rating) {
+                // Already rated
+                ratingHtml = `
+                    <div class="co-rating-done">
+                        ${"★".repeat(o.rating)}${"☆".repeat(5 - o.rating)}
+                        <span>Your rating</span>
+                    </div>`;
+            } else {
+                // Show star input
+                ratingHtml = `
+                    <div class="co-rating-prompt">
+                        <span>Rate your experience</span>
+                        <div class="co-stars" id="stars-${o.id}">
+                            ${[1,2,3,4,5].map(s =>
+                                `<button class="co-star" onclick="submitRating('${o.id}', ${s})" title="${s} star${s>1?'s':''}">☆</button>`
+                            ).join("")}
+                        </div>
+                    </div>`;
+            }
+        }
+
+        return `
+        <div class="co-card co-${cfg.cls}">
+            <div class="co-card-top">
+                <div class="co-status-row">
+                    <span class="co-status-badge co-${cfg.cls}">${cfg.icon} ${cfg.label}</span>
+                    <span class="co-date">${dateStr}</span>
+                </div>
+                <div class="co-tailor-row">
+                    <strong>${escapeHTML(o.tailorShop || o.tailorName || "Tailor")}</strong>
+                    <span class="co-amount">${amount}</span>
+                </div>
+                <div class="co-service-tag">${escapeHTML(o.service || "Tailoring")}</div>
+                ${cfg.desc ? `<p class="co-status-desc">${cfg.desc}</p>` : ""}
+            </div>
+            ${o.description ? `
+            <div class="co-detail">
+                <span>Your request</span>
+                <p>${escapeHTML(o.description)}</p>
+            </div>` : ""}
+            ${o.measurements ? `
+            <div class="co-detail">
+                <span>Measurements</span>
+                <p>${escapeHTML(o.measurements)}</p>
+            </div>` : ""}
+            ${ratingHtml}
+        </div>`;
+    }
+
+    window.submitRating = async function(orderId, stars) {
+        try {
+            await updateDoc(doc(db, "orders", orderId), { rating: stars });
+            // Listener will auto-refresh the card
+        } catch (err) {
+            showToast("Could not save rating. Please try again.");
+            console.error(err);
+        }
+    };
+
+    // Star hover effect — delegate from document
+    document.addEventListener("mouseover", (e) => {
+        const star = e.target.closest(".co-star");
+        if (!star) return;
+        const container = star.closest(".co-stars");
+        if (!container) return;
+        const stars = [...container.querySelectorAll(".co-star")];
+        const idx   = stars.indexOf(star);
+        stars.forEach((s, i) => {
+            s.textContent = i <= idx ? "★" : "☆";
+            s.classList.toggle("hovered", i <= idx);
+        });
+    });
+
+    document.addEventListener("mouseout", (e) => {
+        const star = e.target.closest(".co-star");
+        if (!star) return;
+        const container = star.closest(".co-stars");
+        if (!container) return;
+        container.querySelectorAll(".co-star").forEach(s => {
+            s.textContent = "☆";
+            s.classList.remove("hovered");
+        });
+    });
+
+    /* =====================================================
+       BOOKING MODAL
+    ===================================================== */
+
+    let bookingTailor = null; // the full tailor object currently being booked
+
+    window.openBookingModal = function(tailorId) {
+        // Must be logged in
+        if (!currentUser) {
+            showToast("Please log in to book a tailor.");
+            openAuth("login");
+            return;
+        }
+
+        bookingTailor = allTailors.find(t => t.id === tailorId);
+        if (!bookingTailor) return;
+
+        // --- Shop availability check ---
+        const unavailMsg = getShopUnavailableMessage(bookingTailor);
+        if (unavailMsg) {
+            showShopClosedModal(bookingTailor, unavailMsg);
+            return;
+        }
+
+        const name      = bookingTailor.shop || bookingTailor.name || "Tailor";
+        const specialty = bookingTailor.specialty || "Tailoring";
+
+        document.getElementById("bookingTitle").textContent = name;
+        document.getElementById("bookingSubtitle").textContent = specialty;
+
+        // Pre-select service chip that matches specialty
+        document.querySelectorAll(".bk-service-chip").forEach(chip => {
+            chip.classList.remove("active");
+        });
+        const matchChip = [...document.querySelectorAll(".bk-service-chip")]
+            .find(c => specialty.toLowerCase().includes(c.dataset.service.toLowerCase()));
+        if (matchChip) matchChip.classList.add("active");
+
+        // Clear previous inputs
+        document.getElementById("bkDescription").value  = "";
+        document.getElementById("bkMeasurements").value = "";
+        document.getElementById("bkError").textContent  = "";
+
+        document.getElementById("bookingModal").classList.add("show");
+    };
+
+    window.closeBooking = function() {
+        document.getElementById("bookingModal").classList.remove("show");
+    };
+
+    window.selectServiceChip = function(el) {
+        document.querySelectorAll(".bk-service-chip").forEach(c => c.classList.remove("active"));
+        el.classList.add("active");
+    };
+
+    window.submitOrder = async function() {
+        if (!currentUser || !bookingTailor) return;
+
+        const activeChip    = document.querySelector(".bk-service-chip.active");
+        const service       = activeChip ? activeChip.dataset.service : (bookingTailor.specialty || "Tailoring");
+        const description   = document.getElementById("bkDescription").value.trim();
+        const measurements  = document.getElementById("bkMeasurements").value.trim();
+        const errorEl       = document.getElementById("bkError");
+
+        if (!description) {
+            errorEl.textContent = "Please describe what you need.";
+            return;
+        }
+
+        const submitBtn = document.getElementById("bkSubmitBtn");
+        submitBtn.textContent = "Placing order...";
+        submitBtn.disabled    = true;
+        errorEl.textContent   = "";
+
+        try {
+            const orderData = {
+                customerId:    currentUser.uid,
+                customerName:  currentCustomerData.name || currentUser.displayName || currentUser.email,
+                tailorId:      bookingTailor.id,
+                tailorName:    bookingTailor.name || bookingTailor.shop || "Tailor",
+                tailorShop:    bookingTailor.shop || bookingTailor.name || "Tailor",
+                service,
+                description,
+                measurements:  measurements || "",
+                amount:        Number(bookingTailor.startingPrice || 150),
+                status:        "pending",
+                createdAt:     serverTimestamp()
+            };
+
+            await addDoc(collection(db, "orders"), orderData);
+
+            closeBooking();
+            showToast(`Order placed with ${bookingTailor.shop || bookingTailor.name} ✦`);
+
+        } catch (err) {
+            console.error("Order failed:", err);
+            errorEl.textContent = "Could not place order. Please try again.";
+        } finally {
+            submitBtn.textContent = "Place Order →";
+            submitBtn.disabled    = false;
+        }
+    };
+
+    async function saveTailorListing(uid, data) {
+        await setDoc(doc(db, "tailors", uid), {
+            uid,
+            name: data.name || "",
+            email: data.email || "",
+            shop: data.shop || data.name || "Tailor",
+            specialty: data.specialty || "Tailoring",
+            phone: data.phone || "",
+            location: data.location || "",
+            bio: data.bio || "",
+            photoURL: data.photoURL || "",
+            startingPrice: Number(data.startingPrice || 150),
+            rating: Number(data.rating || 0),
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    }
+
+    async function saveCustomerProfile(uid, data) {
+        await setDoc(doc(db, "customers", uid), {
+            uid,
+            name: data.name || "",
+            email: data.email || "",
+            phone: data.phone || "",
+            createdAt: data.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    }
+
+    /* =====================================================
+       STATE
+    ===================================================== */
+
+    let currentRole = "customer"; // "customer" | "tailor"
+
+    /* =====================================================
+       MODAL OPEN / CLOSE
+    ===================================================== */
+
+    window.openAuth = function(tab = "login") {
+        document.getElementById("authModal").classList.add("show");
+        document.getElementById("stepRole").style.display   = "block";
+        document.getElementById("stepLogin").style.display  = "none";
+        if (tab === "signup") {
+            // pre-select role step first, user picks role then lands on signup tab
+            window._pendingTab = "signup";
+        } else {
+            window._pendingTab = "login";
+        }
+    };
+
+    window.closeAuth = function() {
+        document.getElementById("authModal").classList.remove("show");
+    };
+
+    window.selectRole = function(role) {
+        currentRole = role;
+        document.getElementById("stepRole").style.display  = "none";
+        document.getElementById("stepLogin").style.display = "block";
+        document.getElementById("loginRoleLabel").textContent =
+            role === "tailor" ? "TAILOR LOGIN" : "CUSTOMER LOGIN";
+
+        // show/hide tailor-specific signup fields
+        document.getElementById("tailorFields").style.display =
+            role === "tailor" ? "block" : "none";
+
+        // go to the pending tab
+        switchTab(window._pendingTab || "login");
+    };
+
+    window.goBack = function() {
+        document.getElementById("stepLogin").style.display = "none";
+        document.getElementById("stepRole").style.display  = "block";
+    };
+
+    window.switchTab = function(tab) {
+        const tabs = document.querySelectorAll(".auth-tab");
+        tabs[0].classList.toggle("active", tab === "login");
+        tabs[1].classList.toggle("active", tab === "signup");
+        document.getElementById("loginFields").style.display  = tab === "login"  ? "block" : "none";
+        document.getElementById("signupFields").style.display = tab === "signup" ? "block" : "none";
+        clearErrors();
+    };
+
+    function clearErrors() {
+        document.getElementById("loginError").textContent  = "";
+        document.getElementById("signupError").textContent = "";
+    }
+
+    function showError(id, msg) {
+        document.getElementById(id).textContent = msg;
+    }
+
+    /* =====================================================
+       AUTH — EMAIL LOGIN
+    ===================================================== */
+
+    window.handleLogin = async function() {
+        const email    = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        if (!email || !password) {
+            showError("loginError", "Please fill in all fields.");
+            return;
+        }
+
+        try {
+            const cred = await signInWithEmailAndPassword(auth, email, password);
+
+            const userSnap = await getDoc(doc(db, "users", cred.user.uid));
+            const tailorSnap = await getDoc(doc(db, "tailors", cred.user.uid));
+            const storedRole = userSnap.exists()
+                ? userSnap.data().role
+                : tailorSnap.exists() ? "tailor" : "customer";
+
+            if (storedRole !== currentRole) {
+                await signOut(auth);
+                showError("loginError",
+                    `This account is registered as a ${storedRole}. Please select the correct role.`);
+                return;
+            }
+
+            closeAuth();
+            if (storedRole === "tailor") {
+                window.location.href = "tailor-dashboard.html";
+                return;
+            }
+            showToast(`Welcome back! Logged in as ${storedRole}.`);
+
+        } catch (err) {
+            showError("loginError", friendlyError(err.code));
+        }
+    };
+
+    /* =====================================================
+       AUTH — EMAIL SIGNUP
+    ===================================================== */
+
+    window.handleSignup = async function() {
+        const name     = document.getElementById("signupName").value.trim();
+        const email    = document.getElementById("signupEmail").value.trim();
+        const phone    = document.getElementById("signupPhone").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const shop     = document.getElementById("signupShop")?.value.trim();
+        const specialty= document.getElementById("signupSpecialty")?.value;
+
+        if (!name || !email || !phone || !password) {
+            showError("signupError", "Please fill in all required fields.");
+            return;
+        }
+        if (password.length < 6) {
+            showError("signupError", "Password must be at least 6 characters.");
+            return;
+        }
+        if (currentRole === "tailor" && !shop) {
+            showError("signupError", "Please enter your shop name.");
+            return;
+        }
+
+        try {
+            const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+            const userData = {
+                name,
+                email,
+                phone,
+                role: currentRole,
+                createdAt: new Date().toISOString()
+            };
+
+            if (currentRole === "tailor") {
+                const accountData = {
+                    email,
+                    role: currentRole,
+                    createdAt: userData.createdAt
+                };
+                const tailorData = {
+                    ...userData,
+                    shop,
+                    specialty
+                };
+
+                await setDoc(doc(db, "users", cred.user.uid), accountData);
+                try {
+                    await saveTailorListing(cred.user.uid, tailorData);
+                } catch (listingError) {
+                    console.error("Tailor listing creation failed:", listingError);
+                }
+            } else {
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    email,
+                    role: "customer",
+                    createdAt: userData.createdAt
+                });
+                await saveCustomerProfile(cred.user.uid, userData);
+            }
+
+            closeAuth();
+            if (currentRole === "tailor") {
+                window.location.href = "tailor-dashboard.html";
+                return;
+            }
+            showToast(`Account created! Welcome, ${name} 🎉`);
+
+        } catch (err) {
+            if (err.code === "permission-denied" && currentRole === "customer") {
+                showError("signupError",
+                    "Your account was created, but the customer profile could not be saved. Publish the customers rule in Firestore.");
+            } else {
+                showError("signupError", friendlyError(err.code));
+            }
+        }
+    };
+
+    /* =====================================================
+       AUTH — GOOGLE
+    ===================================================== */
+
+    window.handleGoogleAuth = async function() {
+        try {
+            const cred = await signInWithPopup(auth, provider);
+            const uid  = cred.user.uid;
+            const snap = await getDoc(doc(db, "users", uid));
+
+            if (!snap.exists()) {
+                // first-time Google sign-in — save profile
+                const googleData = {
+                    name:      cred.user.displayName || "",
+                    email:     cred.user.email || "",
+                    phone:     "",
+                    role:      currentRole,
+                    createdAt: new Date().toISOString()
+                };
+                if (currentRole === "tailor") {
+                    await setDoc(doc(db, "users", uid), {
+                        email: googleData.email,
+                        role: googleData.role,
+                        createdAt: googleData.createdAt
+                    });
+                    try {
+                        await saveTailorListing(uid, googleData);
+                    } catch (listingError) {
+                        console.error("Tailor listing creation failed:", listingError);
+                    }
+                } else {
+                    await setDoc(doc(db, "users", uid), {
+                        email: googleData.email,
+                        role: "customer",
+                        createdAt: googleData.createdAt
+                    });
+                    await saveCustomerProfile(uid, googleData);
+                }
+            } else if (snap.data().role !== currentRole) {
+                await signOut(auth);
+                showError("loginError",
+                    `This Google account is registered as a ${snap.data().role}.`);
+                return;
+            }
+
+            closeAuth();
+            if (currentRole === "tailor") {
+                window.location.href = "tailor-dashboard.html";
+                return;
+            }
+            showToast(`Signed in with Google as ${currentRole}!`);
+
+        } catch (err) {
+            if (err.code !== "auth/popup-closed-by-user") {
+                showError("loginError", friendlyError(err.code));
+            }
+        }
+    };
+
+    /* =====================================================
+       AUTH STATE OBSERVER — update navbar
+    ===================================================== */
+
+    onAuthStateChanged(auth, async (user) => {
+        const navAuth = document.getElementById("navAuth");
+        const navUser = document.getElementById("navUser");
+
+        if (user) {
+            const userSnap     = await getDoc(doc(db, "users", user.uid));
+            const tailorSnap   = await getDoc(doc(db, "tailors", user.uid));
+            const customerSnap = await getDoc(doc(db, "customers", user.uid));
+            const data         = userSnap.exists() ? userSnap.data() : {};
+            const tailorData   = tailorSnap.exists() ? tailorSnap.data() : {};
+            const customerData = customerSnap.exists() ? customerSnap.data() : {};
+            const role = data.role || (tailorSnap.exists() ? "tailor" : "customer");
+            const name = tailorData.name || customerData.name || data.name || user.displayName || user.email;
+
+            // Redirect tailors to their dashboard automatically
+            if (role === "tailor") {
+                window.location.href = "tailor-dashboard.html";
+                return;
+            }
+
+            // Store for use in booking
+            currentUser         = user;
+            currentCustomerData = { ...customerData, name };
+
+            if (!customerSnap.exists() && (data.name || data.phone)) {
+                await saveCustomerProfile(user.uid, {
+                    name: data.name,
+                    email: data.email || user.email,
+                    phone: data.phone,
+                    createdAt: data.createdAt
+                });
+            }
+
+            navAuth.style.display = "none";
+            navUser.style.display = "flex";
+
+            document.getElementById("navInitial").textContent =
+                name ? name.charAt(0).toUpperCase() : "U";
+            document.getElementById("navRoleBadge").textContent = "🛍️ Customer";
+            document.getElementById("menuName").textContent  = name;
+            document.getElementById("menuEmail").textContent = user.email;
+
+            // Start live orders listener for this customer
+            listenToCustomerOrders(user.uid);
+
+        } else {
+            currentUser         = null;
+            currentCustomerData = {};
+            navAuth.style.display = "flex";
+            navUser.style.display = "none";
+            renderCustomerOrders(null); // show login prompt
+        }
+    });
+
+    /* =====================================================
+       LOGOUT
+    ===================================================== */
+
+    window.handleLogout = async function() {
+        await signOut(auth);
+        document.getElementById("userMenu").classList.remove("show");
+        showToast("Logged out successfully.");
+    };
+
+    window.toggleUserMenu = function() {
+        document.getElementById("userMenu").classList.toggle("show");
+    };
+
+    // close menu when clicking outside
+    document.addEventListener("click", (e) => {
+        const menu = document.getElementById("userMenu");
+        const btn  = document.getElementById("profileBtn");
+        if (menu && !menu.contains(e.target) && e.target !== btn) {
+            menu.classList.remove("show");
+        }
+    });
+
+    /* =====================================================
+       CLOSE MODAL ON OVERLAY CLICK
+    ===================================================== */
+
+    document.getElementById("authModal").addEventListener("click", function(e) {
+        if (e.target === this) closeAuth();
+    });
+
+    /* =====================================================
+       HELPER — friendly error messages
+    ===================================================== */
+
+    function friendlyError(code) {
+        const map = {
+            "auth/user-not-found":       "No account found with this email.",
+            "auth/wrong-password":       "Incorrect password.",
+            "auth/email-already-in-use": "An account with this email already exists.",
+            "auth/invalid-email":        "Please enter a valid email address.",
+            "auth/weak-password":        "Password must be at least 6 characters.",
+            "auth/too-many-requests":    "Too many attempts. Please try again later.",
+            "auth/invalid-credential":   "Incorrect email or password.",
+            "permission-denied":         "Your account was created, but the profile could not be saved. Check your Firestore rules for the selected account type."
+        };
+        return map[code] || "Something went wrong. Please try again.";
+    }
+
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

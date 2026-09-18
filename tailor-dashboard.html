@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SILAI — Tailor Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tailor-dashboard.css">
+</head>
+
+<body class="dashboard-body">
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+<aside class="td-sidebar" id="tdSidebar">
+
+    <div class="td-sidebar-logo">
+        <span class="logo-icon">✦</span>
+        SILAI
+    </div>
+
+    <nav class="td-nav">
+        <a href="#" class="td-nav-item active" data-section="overview" onclick="showSection('overview', this)">
+            <span class="td-nav-icon">◈</span>
+            Overview
+        </a>
+        <a href="#" class="td-nav-item" data-section="orders" onclick="showSection('orders', this)">
+            <span class="td-nav-icon">📋</span>
+            Orders
+            <span class="td-pending-badge" id="pendingBadge" style="display:none">0</span>
+        </a>
+        <a href="#" class="td-nav-item" data-section="analytics" onclick="showSection('analytics', this)">
+            <span class="td-nav-icon">📊</span>
+            Analytics
+        </a>
+        <a href="#" class="td-nav-item" data-section="profile" onclick="showSection('profile', this)">
+            <span class="td-nav-icon">✂️</span>
+            Profile
+        </a>
+    </nav>
+
+    <div class="td-sidebar-footer">
+        <!-- Shop status toggle -->
+        <div class="td-shop-status" id="shopStatusRow">
+            <span class="td-shop-label" id="shopStatusLabel">Open</span>
+            <button class="td-status-toggle open" id="shopToggleBtn" onclick="toggleShopStatus()">
+                <span class="td-toggle-knob"></span>
+            </button>
+        </div>
+
+        <div class="td-profile-pill">
+            <div class="td-profile-avatar" id="sidebarAvatar">T</div>
+            <div class="td-profile-info">
+                <strong id="sidebarName">Tailor</strong>
+                <small id="sidebarSpecialty">Tailoring</small>
+            </div>
+        </div>
+        <button class="td-logout-btn" onclick="handleLogout()">
+            <span>→</span> Log out
+        </button>
+    </div>
+
+</aside>
+
+<!-- Mobile top bar -->
+<div class="td-topbar">
+    <button class="td-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="logo" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;">
+        <span class="logo-icon">✦</span> SILAI
+    </div>
+    <div class="td-topbar-avatar" id="topbarAvatar">M</div>
+</div>
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+<main class="td-main">
+
+    <!-- =====================================================
+         OVERVIEW SECTION
+    ===================================================== -->
+    <section class="td-section active" id="sec-overview">
+
+        <div class="td-section-header">
+            <div>
+                <span class="section-label">TAILOR DASHBOARD</span>
+                <h1>Good morning, <em id="tailorGreeting">Tailor</em> ✦</h1>
+            </div>
+            <div class="td-date-badge" id="todayDate"></div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="td-stats-grid">
+
+            <div class="td-stat-card">
+                <div class="td-stat-icon green">₹</div>
+                <div class="td-stat-info">
+                    <span>Total Earnings</span>
+                    <strong id="statEarnings">₹0</strong>
+                    <small class="td-stat-trend up" id="trendEarnings">—</small>
+                </div>
+            </div>
+
+            <div class="td-stat-card">
+                <div class="td-stat-icon blue">📋</div>
+                <div class="td-stat-info">
+                    <span>Active Orders</span>
+                    <strong id="statActive">0</strong>
+                    <small class="td-stat-trend" id="trendActive">—</small>
+                </div>
+            </div>
+
+            <div class="td-stat-card">
+                <div class="td-stat-icon gold">✓</div>
+                <div class="td-stat-info">
+                    <span>Completed</span>
+                    <strong id="statCompleted">0</strong>
+                    <small class="td-stat-trend up" id="trendCompleted">—</small>
+                </div>
+            </div>
+
+            <div class="td-stat-card">
+                <div class="td-stat-icon pink">★</div>
+                <div class="td-stat-info">
+                    <span>Avg. Rating</span>
+                    <strong id="statRating">—</strong>
+                    <small class="td-stat-trend up" id="trendRating">—</small>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MINI CHARTS ROW -->
+        <div class="td-overview-row">
+
+            <!-- Weekly revenue sparkline -->
+            <div class="td-card td-chart-card">
+                <div class="td-card-header">
+                    <h3>Revenue This Week</h3>
+                    <span class="td-badge green" id="weeklyTotal">₹0</span>
+                </div>
+                <div class="td-bar-chart" id="weeklyChart"></div>
+                <div class="td-bar-labels" id="weeklyLabels"></div>
+            </div>
+
+            <!-- Service breakdown donut -->
+            <div class="td-card td-donut-card">
+                <div class="td-card-header">
+                    <h3>Orders by Service</h3>
+                </div>
+                <div class="td-donut-wrap">
+                    <svg class="td-donut" viewBox="0 0 120 120" id="donutSvg"></svg>
+                    <div class="td-donut-center" id="donutCenter"></div>
+                </div>
+                <div class="td-legend" id="donutLegend"></div>
+            </div>
+
+        </div>
+
+        <!-- RECENT ORDERS PREVIEW -->
+        <div class="td-card">
+            <div class="td-card-header">
+                <h3>Recent Orders</h3>
+                <button class="td-link-btn" onclick="showSection('orders', null)">View all →</button>
+            </div>
+            <div class="td-orders-table" id="recentOrdersTable"></div>
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         ORDERS SECTION
+    ===================================================== -->
+    <section class="td-section" id="sec-orders">
+
+        <div class="td-section-header">
+            <div>
+                <span class="section-label">ORDER MANAGEMENT</span>
+                <h1>Your <em>Orders</em></h1>
+            </div>
+            <div class="td-filter-row">
+                <button class="td-filter-btn active" onclick="filterOrders('all', this)">All</button>
+                <button class="td-filter-btn" onclick="filterOrders('pending', this)">Pending</button>
+                <button class="td-filter-btn" onclick="filterOrders('in-progress', this)">In Progress</button>
+                <button class="td-filter-btn" onclick="filterOrders('completed', this)">Completed</button>
+            </div>
+        </div>
+
+        <div class="td-card" style="padding: 0; overflow: hidden;">
+            <div class="td-orders-table full" id="fullOrdersTable"></div>
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         ANALYTICS SECTION
+    ===================================================== -->
+    <section class="td-section" id="sec-analytics">
+
+        <div class="td-section-header">
+            <div>
+                <span class="section-label">PERFORMANCE INSIGHTS</span>
+                <h1>Your <em>Analytics</em></h1>
+            </div>
+            <div class="td-period-toggle">
+                <button class="td-filter-btn active" onclick="setAnalyticsPeriod('week', this)">Week</button>
+                <button class="td-filter-btn" onclick="setAnalyticsPeriod('month', this)">Month</button>
+            </div>
+        </div>
+
+        <!-- TOP ANALYTICS STATS -->
+        <div class="td-stats-grid">
+            <div class="td-stat-card">
+                <div class="td-stat-icon green">₹</div>
+                <div class="td-stat-info">
+                    <span>Period Revenue</span>
+                    <strong id="aStatRevenue">₹0</strong>
+                    <small class="td-stat-trend up">vs last period</small>
+                </div>
+            </div>
+            <div class="td-stat-card">
+                <div class="td-stat-icon blue">📦</div>
+                <div class="td-stat-info">
+                    <span>Orders Received</span>
+                    <strong id="aStatOrders">0</strong>
+                    <small class="td-stat-trend up">vs last period</small>
+                </div>
+            </div>
+            <div class="td-stat-card">
+                <div class="td-stat-icon gold">⚡</div>
+                <div class="td-stat-info">
+                    <span>Avg. Turnaround</span>
+                    <strong id="aStatTurnaround">—</strong>
+                    <small class="td-stat-trend">days per order</small>
+                </div>
+            </div>
+            <div class="td-stat-card">
+                <div class="td-stat-icon pink">🔁</div>
+                <div class="td-stat-info">
+                    <span>Repeat Customers</span>
+                    <strong id="aStatRepeat">—</strong>
+                    <small class="td-stat-trend up">of total</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- REVENUE TREND CHART -->
+        <div class="td-card td-analytics-chart-card">
+            <div class="td-card-header">
+                <h3>Revenue Trend</h3>
+                <span class="td-badge green" id="analyticsTotalBadge">₹0</span>
+            </div>
+            <div class="td-area-chart-wrap">
+                <div class="td-area-y-labels" id="areaYLabels"></div>
+                <div class="td-area-chart-inner">
+                    <svg class="td-area-chart" id="areaChartSvg" viewBox="0 0 700 180" preserveAspectRatio="none"></svg>
+                    <div class="td-bar-labels" id="areaXLabels"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM ROW -->
+        <div class="td-overview-row">
+
+            <!-- Service revenue breakdown -->
+            <div class="td-card">
+                <div class="td-card-header">
+                    <h3>Revenue by Service</h3>
+                </div>
+                <div class="td-service-bars" id="serviceRevenueBars"></div>
+            </div>
+
+            <!-- Ratings breakdown -->
+            <div class="td-card">
+                <div class="td-card-header">
+                    <h3>Customer Ratings</h3>
+                    <span class="td-badge gold" id="avgRatingBadge">★ 0</span>
+                </div>
+                <div class="td-ratings-breakdown" id="ratingsBreakdown"></div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         PROFILE SECTION
+    ===================================================== -->
+    <section class="td-section" id="sec-profile">
+
+        <div class="td-section-header">
+            <div>
+                <span class="section-label">YOUR PROFILE</span>
+                <h1>Shop <em>Settings</em></h1>
+            </div>
+        </div>
+
+        <div class="td-profile-grid">
+
+            <div class="td-card td-profile-card">
+                <div class="td-profile-big-avatar" id="profileBigAvatar">M</div>
+                <h2 id="profileShopName">Tailor</h2>
+                <p id="profileSpecialty">Tailoring</p>
+                <div class="td-profile-badges">
+                    <span class="td-badge green">✓ Verified</span>
+                    <span class="td-badge gold" id="profileRatingBadge">★ —</span>
+                </div>
+                <div class="td-profile-shop-status">
+                    <span id="profileShopStatusLabel">Shop is Open</span>
+                    <button class="td-status-toggle open" id="profileToggleBtn" onclick="toggleShopStatus()">
+                        <span class="td-toggle-knob"></span>
+                    </button>
+                </div>
+                <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoChange(event)">
+                <button class="primary-btn td-edit-photo-btn" onclick="document.getElementById('photoFileInput').click()">Change Photo</button>
+            </div>
+
+            <div class="td-card td-profile-form-card">
+                <h3>Shop Details</h3>
+                <div class="td-form-grid">
+                    <div class="field-group">
+                        <label>Shop / Studio Name</label>
+                        <input type="text" id="pShopName" placeholder="Shop or studio name">
+                    </div>
+                    <div class="field-group">
+                        <label>Owner Name</label>
+                        <input type="text" id="pOwnerName" placeholder="Your name">
+                    </div>
+                    <div class="field-group">
+                        <label>Phone</label>
+                        <input type="tel" id="pPhone" placeholder="Phone number">
+                    </div>
+                    <div class="field-group">
+                        <label>Email</label>
+                        <input type="email" id="pEmail" placeholder="Email address">
+                    </div>
+                    <div class="field-group">
+                        <label>Specialty</label>
+                        <select id="pSpecialty">
+                            <option value="">Select specialty</option>
+                            <option>Men's Tailoring</option>
+                            <option>Bridal & Ethnic</option>
+                            <option>Alterations</option>
+                            <option>Custom Design</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Location</label>
+                        <input type="text" id="pLocation" placeholder="Area, city">
+                    </div>
+                    <div class="field-group" style="grid-column: 1 / -1;">
+                        <label>About your shop</label>
+                        <textarea id="pBio" rows="3" placeholder="Tell customers about your shop"></textarea>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 28px;">Availability</h3>
+                <div class="td-availability-row">
+                    <div class="field-group">
+                        <label>Opening Time</label>
+                        <input type="time" id="pOpen" value="09:00">
+                    </div>
+                    <div class="field-group">
+                        <label>Closing Time</label>
+                        <input type="time" id="pClose" value="19:00">
+                    </div>
+                </div>
+
+                <div class="td-days-row">
+                    <span class="section-label" style="font-size: 10px;">WORKING DAYS</span>
+                    <div class="td-day-chips" id="dayChips"></div>
+                </div>
+
+                <h3 style="margin-top: 28px;">Vacation / Break</h3>
+                <p style="font-size:13px;color:#858179;margin-bottom:16px;">
+                    Set a vacation window and your shop will show as unavailable to customers during those dates.
+                </p>
+                <div class="td-availability-row">
+                    <div class="field-group">
+                        <label>From</label>
+                        <input type="date" id="pVacationStart">
+                    </div>
+                    <div class="field-group">
+                        <label>Until</label>
+                        <input type="date" id="pVacationEnd">
+                    </div>
+                </div>
+                <button class="td-clear-vacation-btn" id="clearVacationBtn" onclick="clearVacation()" style="display:none">
+                    ✕ Clear vacation
+                </button>
+
+                <button class="primary-btn td-save-btn" onclick="saveProfile()">Save Changes →</button>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+<div class="toast" id="toast">
+    <span>✓</span>
+    <p id="toastText">Done!</p>
+</div>
+
+<!-- =========================================================
+     ORDER DETAIL MODAL
+========================================================= -->
+<div class="modal-overlay" id="orderModal">
+    <div class="td-order-modal">
+        <button class="close-btn" onclick="closeOrderModal()">×</button>
+        <span class="section-label">ORDER DETAIL</span>
+        <h2 id="modalOrderId">Order #SUI00000</h2>
+        <div class="td-modal-body" id="modalBody"></div>
+        <div class="td-modal-actions" id="modalActions"></div>
+    </div>
+</div>
+
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+<script type="module">
+
+/* =========================================================
+   FIREBASE INIT
+========================================================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    query,
+    where,
+    getDocs,
+    onSnapshot,
+    updateDoc,
+    setDoc,
+    deleteField
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDMmAyMoN2PTo9iEoEeDDz20hMkXVEf9pc",
+    authDomain: "silai-455c4.firebaseapp.com",
+    projectId: "silai-455c4",
+    storageBucket: "silai-455c4.firebasestorage.app",
+    messagingSenderId: "331357923395",
+    appId: "1:331357923395:web:c096d633f70a30be34ccf6"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* =========================================================
+   MOCK DATA  (replace with real Firestore queries)
+========================================================= */
+const DASHBOARD_ORDERS = [];
+
+/* =========================================================
+   STATE
+========================================================= */
+let currentFilter  = "all";
+let analyticsPeriod = "week";
+let tailorData     = {};
+let currentUserId  = null;
+let pendingPhotoFile = null;
+
+/* =========================================================
+   INIT
+========================================================= */
+window.addEventListener("DOMContentLoaded", () => {
+    setTodayDate();
+    buildDayChips();
+});
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+    const tailorSnap = await getDoc(doc(db, "tailors", user.uid));
+    const role = userSnap.exists() ? userSnap.data().role : tailorSnap.exists() ? "tailor" : "";
+    if (role !== "tailor") {
+        await signOut(auth);
+        window.location.href = "index.html";
+        return;
+    }
+
+    currentUserId = user.uid;
+    if (!userSnap.exists()) {
+        await setDoc(doc(db, "users", user.uid), {
+            email: user.email || "",
+            role: "tailor",
+            restoredAt: new Date().toISOString()
+        }, { merge: true });
+    }
+    tailorData = tailorSnap.exists()
+        ? { ...tailorSnap.data(), email: tailorSnap.data().email || user.email || "" }
+        : { ...userSnap.data(), email: userSnap.data().email || user.email || "" };
+    try {
+        await updateDoc(doc(db, "users", user.uid), {
+            name: deleteField(),
+            phone: deleteField(),
+            shop: deleteField(),
+            specialty: deleteField(),
+            location: deleteField(),
+            bio: deleteField(),
+            photoURL: deleteField(),
+            openingTime: deleteField(),
+            closingTime: deleteField(),
+            workingDays: deleteField()
+        });
+    } catch (cleanupError) {
+        console.warn("Legacy tailor fields could not be cleaned from users:", cleanupError);
+    }
+    try {
+        await setDoc(doc(db, "tailors", user.uid), {
+            uid: user.uid,
+            name: tailorData.name || "",
+            email: tailorData.email,
+            shop: tailorData.shop || tailorData.name || "Tailor",
+            specialty: tailorData.specialty || "Tailoring",
+            phone: tailorData.phone || "",
+            location: tailorData.location || "",
+            bio: tailorData.bio || "",
+            photoURL: tailorData.photoURL || "",
+            startingPrice: Number(tailorData.startingPrice || 150),
+            rating: Number(tailorData.rating || 0),
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+    } catch (listingError) {
+        console.error("Tailor listing sync failed:", listingError);
+        showToast("Profile loaded, but public listing sync was blocked by Firestore rules.");
+    }
+    applyTailorData(tailorData);
+    await loadTailorOrders(user);
+    // renderDashboard() is now driven by the onSnapshot listener in loadTailorOrders
+    renderWeeklyChart(); // render chart immediately with empty data while orders load
+    buildDayChips();
+});
+
+
+
+async function loadTailorOrders(user) {
+    try {
+        // Targeted query — only this tailor's orders
+        const q = query(
+            collection(db, "orders"),
+            where("tailorId", "==", user.uid)
+        );
+
+        // Real-time listener — updates dashboard whenever an order changes
+        onSnapshot(q, (snapshot) => {
+            const loaded = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            DASHBOARD_ORDERS.splice(0, DASHBOARD_ORDERS.length, ...loaded.map(normalizeOrder));
+            renderStats();
+            renderWeeklyChart();
+            renderDonut();
+            renderRecentOrders();
+            renderFullOrders();
+            renderAnalytics();
+            renderRatings();
+        }, (error) => {
+            console.error("Orders listener error:", error);
+            showToast("Could not load your orders.");
+        });
+
+    } catch (error) {
+        showToast("Could not load your orders.");
+        console.error("Order loading failed:", error);
+    }
+}
+
+function normalizeOrder(order) {
+    // Use completedDate for revenue charts (money received date), fall back to createdAt
+    let dateStr = "—";
+    if (order.completedDate) {
+        dateStr = order.completedDate;
+    } else if (order.status === "completed" && order.createdAt?.toDate) {
+        // Orders completed before completedDate field existed — use createdAt as fallback
+        dateStr = order.createdAt.toDate().toISOString().slice(0, 10);
+    } else if (order.createdAt?.toDate) {
+        dateStr = order.createdAt.toDate().toISOString().slice(0, 10);
+    } else if (typeof order.createdAt === "string") {
+        dateStr = order.createdAt.slice(0, 10);
+    } else if (order.date) {
+        dateStr = order.date;
+    }
+
+    return {
+        ...order,
+        id:           order.id || "—",
+        customer:     order.customerName || order.customer || "Customer",
+        service:      order.service || order.serviceType || "Tailoring",
+        amount:       Number(order.amount || order.price || 0),
+        status:       order.status || "pending",
+        date:         dateStr,
+        description:  order.description || "",
+        measurements: order.measurements || "",
+        rating:       order.rating || null
+    };
+}
+
+function getRevenueData(period) {
+    const days = period === "week" ? 7 : 8;
+    const now  = new Date();
+    const points = [];
+
+    for (let index = days - 1; index >= 0; index--) {
+        const date = new Date(now);
+        date.setHours(0, 0, 0, 0);
+        date.setDate(now.getDate() - index * (period === "week" ? 1 : 4));
+        const key = date.toISOString().slice(0, 10);
+
+        // Only count COMPLETED orders — money actually received
+        const amount = DASHBOARD_ORDERS
+            .filter(o => o.status === "completed" && o.date === key)
+            .reduce((total, o) => total + o.amount, 0);
+
+        points.push({
+            day: period === "week"
+                ? date.toLocaleDateString("en-IN", { weekday: "short" })
+                : date.toLocaleDateString("en-IN", { month: "short", day: "numeric" }),
+            amount
+        });
+    }
+
+    return points;
+}
+
+function applyTailorData(d) {
+    const firstName = (d.name || "Tailor").split(" ")[0];
+    document.getElementById("tailorGreeting").textContent = firstName;
+    document.getElementById("sidebarName").textContent    = d.shop || d.name || "Tailor";
+    document.getElementById("sidebarSpecialty").textContent = d.specialty || "Tailoring";
+    document.getElementById("profileShopName").textContent = d.shop || d.name || "Tailor";
+    document.getElementById("profileSpecialty").textContent = d.specialty || "Tailoring";
+
+    // Avatar — use saved photo if available, else initial letter
+    const initial = firstName[0].toUpperCase();
+    if (d.photoURL) {
+        const imgTag = `<img src="${d.photoURL}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
+        document.getElementById("profileBigAvatar").innerHTML = imgTag;
+        const sidebarAvatar = document.querySelector(".td-profile-avatar");
+        if (sidebarAvatar) sidebarAvatar.innerHTML = imgTag;
+        const topbarAvatar = document.getElementById("topbarAvatar");
+        if (topbarAvatar) topbarAvatar.innerHTML = imgTag;
+    } else {
+        document.getElementById("profileBigAvatar").textContent = initial;
+        document.getElementById("topbarAvatar").textContent      = initial;
+        document.querySelector(".td-profile-avatar").textContent = initial;
+    }
+
+    if (document.getElementById("pShopName"))  document.getElementById("pShopName").value  = d.shop || d.name || "";
+    if (document.getElementById("pOwnerName")) document.getElementById("pOwnerName").value = d.name || "";
+    if (document.getElementById("pEmail"))     document.getElementById("pEmail").value     = d.email || "";
+    if (document.getElementById("pPhone"))     document.getElementById("pPhone").value     = d.phone || "";
+    if (document.getElementById("pSpecialty")) document.getElementById("pSpecialty").value = d.specialty || "";
+    if (document.getElementById("pLocation"))  document.getElementById("pLocation").value  = d.location || "";
+    if (document.getElementById("pBio"))      document.getElementById("pBio").value      = d.bio || "";
+    if (document.getElementById("pOpen"))     document.getElementById("pOpen").value     = d.openingTime || "09:00";
+    if (document.getElementById("pClose"))    document.getElementById("pClose").value    = d.closingTime || "19:00";
+    activeDays = new Set(d.workingDays || DAYS.slice(0, 6));
+    buildDayChips();
+
+    // Apply shop open/closed status
+    applyShopStatus(d.isOpen !== false); // default to open
+
+    // Load vacation dates
+    if (document.getElementById("pVacationStart")) {
+        document.getElementById("pVacationStart").value = d.vacationStart || "";
+        document.getElementById("pVacationEnd").value   = d.vacationEnd   || "";
+        const clearBtn = document.getElementById("clearVacationBtn");
+        if (clearBtn) clearBtn.style.display = (d.vacationStart) ? "inline-flex" : "none";
+    }
+}
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+function setTodayDate() {
+    const now = new Date();
+    const opts = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+    document.getElementById("todayDate").textContent = now.toLocaleDateString("en-IN", opts);
+}
+
+function fmt(n) {
+    return "₹" + n.toLocaleString("en-IN");
+}
+
+function statusBadge(s) {
+    const map = {
+        "pending":     { cls: "orange", label: "Pending"     },
+        "in-progress": { cls: "blue",   label: "In Progress" },
+        "completed":   { cls: "green",  label: "Completed"   },
+        "cancelled":   { cls: "red",    label: "Cancelled"   },
+    };
+    const m = map[s] || { cls: "grey", label: s };
+    return `<span class="td-status-badge ${m.cls}">${m.label}</span>`;
+}
+
+function showToast(msg) {
+    const t = document.getElementById("toast");
+    document.getElementById("toastText").textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+/* =========================================================
+   NAV
+========================================================= */
+window.showSection = function(id, el) {
+    document.querySelectorAll(".td-section").forEach(s => s.classList.remove("active"));
+    document.getElementById("sec-" + id).classList.add("active");
+    document.querySelectorAll(".td-nav-item").forEach(i => i.classList.remove("active"));
+    if (el) el.classList.add("active");
+    else {
+        const match = document.querySelector(`.td-nav-item[data-section="${id}"]`);
+        if (match) match.classList.add("active");
+    }
+    // close sidebar on mobile
+    document.getElementById("tdSidebar").classList.remove("open");
+    return false;
+};
+
+window.toggleSidebar = function() {
+    document.getElementById("tdSidebar").classList.toggle("open");
+};
+
+/* =========================================================
+   STATS
+========================================================= */
+function renderStats() {
+    const completedOrders = DASHBOARD_ORDERS.filter(o => o.status === "completed");
+    const totalEarnings   = completedOrders.reduce((s, o) => s + o.amount, 0);
+    const active          = DASHBOARD_ORDERS.filter(o => o.status === "in-progress" || o.status === "pending").length;
+    const completed       = completedOrders.length;
+    const pending         = DASHBOARD_ORDERS.filter(o => o.status === "pending").length;
+
+    const ratings   = DASHBOARD_ORDERS.filter(o => o.rating).map(o => o.rating);
+    const avgRating = ratings.length
+        ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+        : "—";
+
+    document.getElementById("statEarnings").textContent  = fmt(totalEarnings);
+    document.getElementById("statActive").textContent    = active;
+    document.getElementById("statCompleted").textContent = completed;
+    document.getElementById("statRating").textContent    = avgRating !== "—" ? "★ " + avgRating : "—";
+
+    document.getElementById("trendEarnings").textContent  = completedOrders.length ? "from " + completedOrders.length + " order" + (completedOrders.length > 1 ? "s" : "") : "No completed orders yet";
+    document.getElementById("trendActive").textContent    = active ? active + " need attention" : "All clear";
+    document.getElementById("trendCompleted").textContent = completed ? completed + " total" : "None yet";
+    document.getElementById("trendRating").textContent    = ratings.length ? "Based on " + ratings.length + " review" + (ratings.length > 1 ? "s" : "") : "No ratings yet";
+
+    // Update pending badge in sidebar
+    const badge = document.getElementById("pendingBadge");
+    if (badge) {
+        badge.textContent    = pending;
+        badge.style.display  = pending > 0 ? "flex" : "none";
+    }
+
+    // Update profile rating badge
+    const profileBadge = document.getElementById("profileRatingBadge");
+    if (profileBadge) profileBadge.textContent = avgRating !== "—" ? "★ " + avgRating : "★ New";
+}
+
+/* =========================================================
+   WEEKLY BAR CHART
+========================================================= */
+function renderWeeklyChart() {
+    const data = getRevenueData("week");
+    const max  = Math.max(...data.map(d => d.amount), 1);
+    const total = data.reduce((s, d) => s + d.amount, 0);
+
+    document.getElementById("weeklyTotal").textContent = fmt(total);
+
+    const chartEl  = document.getElementById("weeklyChart");
+    const labelsEl = document.getElementById("weeklyLabels");
+    chartEl.innerHTML  = "";
+    labelsEl.innerHTML = "";
+
+    data.forEach(d => {
+        const pct = (d.amount / max) * 100;
+        const bar = document.createElement("div");
+        bar.className = "td-bar";
+        bar.innerHTML = `
+            <div class="td-bar-tooltip">${fmt(d.amount)}</div>
+            <div class="td-bar-fill" style="height:${pct}%"></div>
+        `;
+        chartEl.appendChild(bar);
+
+        const lbl = document.createElement("span");
+        lbl.textContent = d.day;
+        labelsEl.appendChild(lbl);
+    });
+}
+
+/* =========================================================
+   DONUT CHART
+========================================================= */
+function renderDonut() {
+    const services = {};
+    DASHBOARD_ORDERS.forEach(o => {
+        services[o.service] = (services[o.service] || 0) + 1;
+    });
+    const total   = Object.values(services).reduce((a, b) => a + b, 0);
+    const svg     = document.getElementById("donutSvg");
+    const legend  = document.getElementById("donutLegend");
+    const center  = document.getElementById("donutCenter");
+    svg.innerHTML = ""; legend.innerHTML = "";
+
+    if (!total) {
+        center.innerHTML = `<small style="color:#858179;font-size:11px;">No orders yet</small>`;
+        return;
+    }
+
+    const colors  = ["#2b6be6", "#f0a500", "#22b573", "#e64c2b", "#9b59b6", "#1abc9c"];
+    const entries = Object.entries(services);
+    const cx = 60, cy = 60, r = 45, strokeW = 18;
+    const circ = 2 * Math.PI * r;
+    let offset = 0;
+
+    entries.forEach(([service, count], i) => {
+        const pct   = count / total;
+        const dash  = pct * circ;
+        const gap   = circ - dash;
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r",  r);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", colors[i % colors.length]);
+        circle.setAttribute("stroke-width", strokeW);
+        circle.setAttribute("stroke-dasharray", `${dash} ${gap}`);
+        circle.setAttribute("stroke-dashoffset", -offset);
+        circle.style.transform = "rotate(-90deg)";
+        circle.style.transformOrigin = "60px 60px";
+        svg.appendChild(circle);
+        offset += dash;
+
+        const item = document.createElement("div");
+        item.className = "td-legend-item";
+        item.innerHTML = `<span class="td-legend-dot" style="background:${colors[i % colors.length]}"></span>
+                          <span>${service}</span>
+                          <strong>${count}</strong>`;
+        legend.appendChild(item);
+    });
+
+    center.innerHTML = `<strong>${total}</strong><small>orders</small>`;
+}
+
+/* =========================================================
+   ORDERS TABLE
+========================================================= */
+function renderOrderRow(o, compact = false) {
+    return `
+    <div class="td-order-row" onclick="openOrderModal('${o.id}')">
+        <div class="td-order-cell id">#${o.id}</div>
+        <div class="td-order-cell customer">
+            <div class="td-cust-avatar">${o.customer[0]}</div>
+            ${o.customer}
+        </div>
+        ${compact ? "" : `<div class="td-order-cell service">${o.service}</div>`}
+        <div class="td-order-cell amount">${fmt(o.amount)}</div>
+        <div class="td-order-cell status">${statusBadge(o.status)}</div>
+        <div class="td-order-cell date">${o.date}</div>
+    </div>`;
+}
+
+function renderRecentOrders() {
+    const el = document.getElementById("recentOrdersTable");
+    const recent = [...DASHBOARD_ORDERS].slice(0, 5);
+    el.innerHTML = `
+        <div class="td-order-head">
+            <span>Order ID</span>
+            <span>Customer</span>
+            <span>Amount</span>
+            <span>Status</span>
+            <span>Date</span>
+        </div>
+        ${recent.map(o => renderOrderRow(o, true)).join("")}
+    `;
+}
+
+window.filterOrders = function(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll(".td-filter-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderFullOrders();
+};
+
+function renderFullOrders() {
+    const el = document.getElementById("fullOrdersTable");
+    const filtered = currentFilter === "all"
+        ? DASHBOARD_ORDERS
+        : DASHBOARD_ORDERS.filter(o => o.status === currentFilter);
+
+    el.innerHTML = `
+        <div class="td-order-head full">
+            <span>Order ID</span>
+            <span>Customer</span>
+            <span>Service</span>
+            <span>Amount</span>
+            <span>Status</span>
+            <span>Date</span>
+        </div>
+        ${filtered.length
+            ? filtered.map(o => renderOrderRow(o, false)).join("")
+            : `<div class="td-empty-state">No orders found ✦</div>`
+        }
+    `;
+}
+
+/* =========================================================
+   ORDER MODAL
+========================================================= */
+window.openOrderModal = function(id) {
+    const order = DASHBOARD_ORDERS.find(o => o.id === id);
+    if (!order) return;
+
+    document.getElementById("modalOrderId").textContent = "Order #" + order.id;
+
+    document.getElementById("modalBody").innerHTML = `
+        <div class="td-modal-grid">
+            <div><span>Customer</span><strong>${order.customer}</strong></div>
+            <div><span>Service</span><strong>${order.service}</strong></div>
+            <div><span>Amount</span><strong>${fmt(order.amount)}</strong></div>
+            <div><span>Date</span><strong>${order.date}</strong></div>
+            <div><span>Status</span>${statusBadge(order.status)}</div>
+            <div><span>Rating</span><strong>${order.rating ? "★".repeat(order.rating) : "—"}</strong></div>
+        </div>
+        ${order.description ? `
+        <div class="td-modal-detail">
+            <span>What they need</span>
+            <p>${order.description}</p>
+        </div>` : ""}
+        ${order.measurements ? `
+        <div class="td-modal-detail">
+            <span>Measurements</span>
+            <p>${order.measurements}</p>
+        </div>` : ""}
+    `;
+
+    const actions = document.getElementById("modalActions");
+    actions.innerHTML = "";
+
+    if (order.status === "pending") {
+        const acceptBtn = document.createElement("button");
+        acceptBtn.className   = "primary-btn";
+        acceptBtn.textContent = "Accept →";
+        acceptBtn.onclick     = () => openAcceptModal(id);
+        actions.appendChild(acceptBtn);
+
+        const rejectBtn = document.createElement("button");
+        rejectBtn.className   = "td-reject-btn";
+        rejectBtn.textContent = "Reject";
+        rejectBtn.onclick     = () => updateOrderStatus(id, "cancelled");
+        actions.appendChild(rejectBtn);
+    }
+
+    if (order.status === "in-progress") {
+        const btn = document.createElement("button");
+        btn.className   = "primary-btn";
+        btn.textContent = "Mark as Completed ✓";
+        btn.onclick     = () => updateOrderStatus(id, "completed");
+        actions.appendChild(btn);
+    }
+
+    document.getElementById("orderModal").classList.add("show");
+};
+
+window.closeOrderModal = function() {
+    document.getElementById("orderModal").classList.remove("show");
+};
+
+/* Accept order — lets tailor set final price before confirming */
+function openAcceptModal(id) {
+    const order = DASHBOARD_ORDERS.find(o => o.id === id);
+    if (!order) return;
+
+    const actions = document.getElementById("modalActions");
+    actions.innerHTML = `
+        <div class="td-accept-price-row">
+            <div class="field-group" style="flex:1;margin:0;">
+                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#858179;display:block;margin-bottom:6px;">
+                    Final Price (₹)
+                </label>
+                <input
+                    type="number"
+                    id="finalPriceInput"
+                    value="${order.amount || ""}"
+                    min="0"
+                    placeholder="e.g. 650"
+                    style="width:100%;padding:10px 14px;border:1.5px solid #e7e3da;border-radius:10px;font-size:15px;font-family:inherit;outline:none;"
+                    oninput="this.style.borderColor='#2b6be6'"
+                >
+            </div>
+            <button class="primary-btn" style="align-self:flex-end;white-space:nowrap;" onclick="confirmAccept('${id}')">
+                Confirm Accept →
+            </button>
+            <button class="td-reject-btn" style="align-self:flex-end;" onclick="openOrderModal('${id}')">
+                Back
+            </button>
+        </div>
+        <p style="font-size:11px;color:#aaa49a;margin-top:8px;">
+            This is the price the customer will see. Defaults to your starting price.
+        </p>
+    `;
+}
+
+window.confirmAccept = async function(id) {
+    const input  = document.getElementById("finalPriceInput");
+    const amount = parseFloat(input?.value);
+    if (!amount || amount <= 0) {
+        input.style.borderColor = "#e64c2b";
+        return;
+    }
+    await updateOrderStatus(id, "in-progress", amount);
+};
+
+async function updateOrderStatus(id, newStatus, finalAmount) {
+    const order = DASHBOARD_ORDERS.find(o => o.id === id);
+    if (!order || !currentUserId) return;
+
+    try {
+        const update = { status: newStatus };
+        if (finalAmount !== undefined) update.amount = finalAmount;
+        // Record the date the order was completed for revenue tracking
+        if (newStatus === "completed") {
+            update.completedDate = new Date().toISOString().slice(0, 10);
+            // Use completedDate as the date for revenue charts
+            order.date = update.completedDate;
+        }
+        await updateDoc(doc(db, "orders", id), update);
+        if (finalAmount !== undefined) order.amount = finalAmount;
+        order.status = newStatus;
+        closeOrderModal();
+        const labelMap = {
+            "in-progress": "accepted",
+            "completed":   "completed",
+            "cancelled":   "rejected"
+        };
+        showToast(`Order ${labelMap[newStatus] || newStatus} ✦`);
+    } catch (error) {
+        showToast("Could not update this order.");
+        console.error("Order update failed:", error);
+    }
+}
+
+/* =========================================================
+   ANALYTICS
+========================================================= */
+window.setAnalyticsPeriod = function(period, btn) {
+    analyticsPeriod = period;
+    document.querySelectorAll(".td-period-toggle .td-filter-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderAnalytics();
+};
+
+function renderAnalytics() {
+    const data  = getRevenueData(analyticsPeriod);
+    const total = data.reduce((s, d) => s + d.amount, 0);
+
+    // Count orders in the period window
+    const now     = new Date();
+    const cutoff  = new Date(now);
+    cutoff.setDate(now.getDate() - (analyticsPeriod === "week" ? 7 : 30));
+    const periodOrders = DASHBOARD_ORDERS.filter(o => {
+        if (!o.date || o.date === "—") return false;
+        return new Date(o.date) >= cutoff;
+    });
+
+    // Avg turnaround: days between createdAt and completed (not available client-side easily,
+    // so we show completed count as a proxy label)
+    const completedCount = DASHBOARD_ORDERS.filter(o => o.status === "completed").length;
+
+    // Repeat customers: customers with more than 1 order
+    const custFreq = {};
+    DASHBOARD_ORDERS.forEach(o => { custFreq[o.customerId || o.customer] = (custFreq[o.customerId || o.customer] || 0) + 1; });
+    const repeatCount = Object.values(custFreq).filter(v => v > 1).length;
+    const totalCusts  = Object.keys(custFreq).length;
+    const repeatPct   = totalCusts ? Math.round((repeatCount / totalCusts) * 100) + "%" : "—";
+
+    document.getElementById("analyticsTotalBadge").textContent = fmt(total);
+    document.getElementById("aStatRevenue").textContent        = fmt(total);
+    document.getElementById("aStatOrders").textContent         = periodOrders.length || DASHBOARD_ORDERS.length;
+    document.getElementById("aStatTurnaround").textContent     = completedCount ? completedCount + " done" : "—";
+    document.getElementById("aStatRepeat").textContent         = repeatPct;
+
+    renderAreaChart(data);
+    renderServiceRevenue();
+}
+
+function renderAreaChart(data) {
+    const svg = document.getElementById("areaChartSvg");
+    const labelsEl = document.getElementById("areaXLabels");
+    const yLabelsEl = document.getElementById("areaYLabels");
+    svg.innerHTML = ""; labelsEl.innerHTML = ""; yLabelsEl.innerHTML = "";
+
+    const W = 700, H = 180, pad = 20;
+    const max = Math.max(...data.map(d => d.amount), 1);
+    const step = (W - pad * 2) / (data.length - 1 || 1);
+
+    const points = data.map((d, i) => ({
+        x: pad + i * step,
+        y: H - pad - ((d.amount / max) * (H - pad * 2))
+    }));
+
+    // gradient fill
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    defs.innerHTML = `
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#2b6be6" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#2b6be6" stop-opacity="0"/>
+        </linearGradient>`;
+    svg.appendChild(defs);
+
+    // area path
+    const areaD = `M${points[0].x},${H - pad}
+        ${points.map(p => `L${p.x},${p.y}`).join(" ")}
+        L${points[points.length-1].x},${H - pad} Z`;
+    const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    area.setAttribute("d", areaD);
+    area.setAttribute("fill", "url(#areaGrad)");
+    svg.appendChild(area);
+
+    // line path
+    const lineD = `M${points.map(p => `${p.x},${p.y}`).join(" L")}`;
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    line.setAttribute("d", lineD);
+    line.setAttribute("fill", "none");
+    line.setAttribute("stroke", "#2b6be6");
+    line.setAttribute("stroke-width", "2.5");
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(line);
+
+    // dots
+    points.forEach((p, i) => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", p.x);
+        circle.setAttribute("cy", p.y);
+        circle.setAttribute("r", "4");
+        circle.setAttribute("fill", "#2b6be6");
+        circle.setAttribute("stroke", "#fff");
+        circle.setAttribute("stroke-width", "2");
+        svg.appendChild(circle);
+    });
+
+    // x labels
+    data.forEach(d => {
+        const lbl = document.createElement("span");
+        lbl.textContent = d.day;
+        labelsEl.appendChild(lbl);
+    });
+
+    // y labels
+    const steps = [0, 0.25, 0.5, 0.75, 1];
+    steps.reverse().forEach(s => {
+        const lbl = document.createElement("span");
+        lbl.textContent = fmt(Math.round(max * s));
+        yLabelsEl.appendChild(lbl);
+    });
+}
+
+function renderServiceRevenue() {
+    const el = document.getElementById("serviceRevenueBars");
+    el.innerHTML = "";
+    const services = {};
+    DASHBOARD_ORDERS.forEach(o => {
+        if (o.status === "completed")
+            services[o.service] = (services[o.service] || 0) + o.amount;
+    });
+    if (!Object.keys(services).length) {
+        el.innerHTML = `<p style="color:#858179;font-size:13px;padding:12px 0;">No completed orders yet.</p>`;
+        return;
+    }
+    const max = Math.max(...Object.values(services), 1);
+    const colors = ["#2b6be6", "#f0a500", "#22b573", "#e64c2b", "#9b59b6"];
+    Object.entries(services).forEach(([svc, amt], i) => {
+        const pct = (amt / max) * 100;
+        el.innerHTML += `
+            <div class="td-svc-bar-row">
+                <span class="td-svc-label">${svc}</span>
+                <div class="td-svc-bar-track">
+                    <div class="td-svc-bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div>
+                </div>
+                <span class="td-svc-amount">${fmt(amt)}</span>
+            </div>`;
+    });
+}
+
+function renderRatings() {
+    const el    = document.getElementById("ratingsBreakdown");
+    const badge = document.getElementById("avgRatingBadge");
+    el.innerHTML = "";
+
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    DASHBOARD_ORDERS.forEach(o => { if (o.rating) counts[o.rating]++; });
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    const avg   = total
+        ? (Object.entries(counts).reduce((s, [k, v]) => s + (+k * v), 0) / total).toFixed(1)
+        : null;
+
+    badge.textContent = avg ? "★ " + avg : "★ —";
+
+    if (!total) {
+        el.innerHTML = `<p style="color:#858179;font-size:13px;padding:12px 0;">No ratings yet.</p>`;
+        return;
+    }
+
+    [5, 4, 3, 2, 1].forEach(star => {
+        const pct = (counts[star] / total) * 100;
+        el.innerHTML += `
+            <div class="td-rating-row">
+                <span class="td-star-label">★ ${star}</span>
+                <div class="td-rating-track">
+                    <div class="td-rating-fill" style="width:${pct}%"></div>
+                </div>
+                <span class="td-rating-count">${counts[star]}</span>
+            </div>`;
+    });
+}
+
+/* =========================================================
+   PROFILE / DAY CHIPS
+========================================================= */
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+let activeDays = new Set(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+
+function buildDayChips() {
+    const el = document.getElementById("dayChips");
+    el.innerHTML = "";
+    DAYS.forEach(d => {
+        const chip = document.createElement("button");
+        chip.className = "td-day-chip" + (activeDays.has(d) ? " active" : "");
+        chip.textContent = d;
+        chip.onclick = () => {
+            if (activeDays.has(d)) activeDays.delete(d);
+            else activeDays.add(d);
+            chip.classList.toggle("active");
+        };
+        el.appendChild(chip);
+    });
+}
+
+window.saveProfile = async function() {
+    if (!currentUserId) {
+        showToast("Please log in again to save your profile.");
+        return;
+    }
+
+    const profile = {
+        shop: document.getElementById("pShopName").value.trim(),
+        name: document.getElementById("pOwnerName").value.trim(),
+        phone: document.getElementById("pPhone").value.trim(),
+        email: document.getElementById("pEmail").value.trim(),
+        specialty: document.getElementById("pSpecialty").value,
+        location: document.getElementById("pLocation").value.trim(),
+        bio: document.getElementById("pBio").value.trim(),
+        openingTime: document.getElementById("pOpen").value,
+        closingTime: document.getElementById("pClose").value,
+        workingDays: [...activeDays],
+        vacationStart: document.getElementById("pVacationStart")?.value || "",
+        vacationEnd:   document.getElementById("pVacationEnd")?.value   || "",
+    };
+
+    if (!profile.name || !profile.shop) {
+        showToast("Shop name and owner name are required.");
+        return;
+    }
+
+    try {
+        await setDoc(doc(db, "tailors", currentUserId), {
+            uid: currentUserId,
+            name: profile.name,
+            email: profile.email,
+            shop: profile.shop,
+            specialty: profile.specialty,
+            phone: profile.phone,
+            location: profile.location,
+            bio: profile.bio,
+            openingTime: profile.openingTime,
+            closingTime: profile.closingTime,
+            workingDays: profile.workingDays,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        let savedPhotoURL = tailorData.photoURL || "";
+        if (pendingPhotoFile) {
+            const photoURL = await uploadPhoto(pendingPhotoFile, currentUserId);
+            await setDoc(doc(db, "tailors", currentUserId), { photoURL }, { merge: true });
+            savedPhotoURL = photoURL;
+            pendingPhotoFile = null;
+        }
+
+        tailorData = { ...tailorData, ...profile };
+        tailorData.photoURL = savedPhotoURL;
+        applyTailorData(tailorData);
+        showToast("Profile saved successfully ✦");
+    } catch (error) {
+        showToast("Could not save your profile.");
+        console.error("Profile update failed:", error);
+    }
+};
+
+/* =========================================================
+   CHANGE PHOTO
+========================================================= */
+window.handlePhotoChange = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate — image only, max 5MB
+    if (!file.type.startsWith("image/")) {
+        showToast("Please select an image file.");
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast("Image must be under 5MB.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const src = e.target.result;
+        const avatar = document.getElementById("profileBigAvatar");
+
+        // Swap text initial for actual image
+        avatar.innerHTML = `<img src="${src}" alt="Profile photo" style="
+            width:100%; height:100%; object-fit:cover;
+            border-radius:50%; display:block;">`;
+
+        // Also update the sidebar avatar letter → image
+        const sidebarAvatar = document.querySelector(".td-profile-avatar");
+        if (sidebarAvatar) {
+            sidebarAvatar.innerHTML = `<img src="${src}" alt="Profile photo" style="
+                width:100%; height:100%; object-fit:cover;
+                border-radius:50%; display:block;">`;
+        }
+
+        // Update mobile topbar avatar too
+        const topbarAvatar = document.getElementById("topbarAvatar");
+        if (topbarAvatar) {
+            topbarAvatar.innerHTML = `<img src="${src}" alt="Profile photo" style="
+                width:100%; height:100%; object-fit:cover;
+                border-radius:50%; display:block;">`;
+        }
+
+        showToast("Photo updated ✦");
+
+        pendingPhotoFile = file;
+        showToast("Photo ready. Click Save Changes to save it.");
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so same file can be picked again
+    event.target.value = "";
+};
+
+async function uploadPhoto(file, uid) {
+    try {
+        const { getStorage, ref, uploadBytes, getDownloadURL } =
+            await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+
+        const storage  = getStorage(app);
+        const photoRef = ref(storage, `avatars/${uid}`);
+        await uploadBytes(photoRef, file);
+        const url = await getDownloadURL(photoRef);
+
+        return url;
+    } catch (err) {
+        try {
+            const dataURL = await resizeImage(file);
+            return dataURL;
+        } catch (fallbackError) {
+            console.error("Photo save failed:", fallbackError);
+            throw fallbackError;
+        }
+    }
+}
+
+function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+            const size = 320;
+            const scale = Math.min(size / image.width, size / image.height, 1);
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(image.width * scale));
+            canvas.height = Math.max(1, Math.round(image.height * scale));
+            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", 0.78));
+        };
+        image.onerror = reject;
+        image.src = URL.createObjectURL(file);
+    });
+}
+
+window.clearVacation = async function() {
+    if (document.getElementById("pVacationStart")) {
+        document.getElementById("pVacationStart").value = "";
+        document.getElementById("pVacationEnd").value   = "";
+    }
+    const clearBtn = document.getElementById("clearVacationBtn");
+    if (clearBtn) clearBtn.style.display = "none";
+    if (currentUserId) {
+        try {
+            await updateDoc(doc(db, "tailors", currentUserId), { vacationStart: "", vacationEnd: "" });
+            showToast("Vacation cleared ✦");
+        } catch (e) { console.warn(e); }
+    }
+};
+
+/* =========================================================
+   SHOP OPEN / CLOSED TOGGLE
+========================================================= */
+let shopIsOpen = true;
+
+function applyShopStatus(isOpen) {
+    shopIsOpen = isOpen;
+    const label        = document.getElementById("shopStatusLabel");
+    const sidebarBtn   = document.getElementById("shopToggleBtn");
+    const profileLabel = document.getElementById("profileShopStatusLabel");
+    const profileBtn   = document.getElementById("profileToggleBtn");
+
+    if (label)        label.textContent        = isOpen ? "Open" : "Closed";
+    if (profileLabel) profileLabel.textContent = isOpen ? "Shop is Open" : "Shop is Closed";
+
+    [sidebarBtn, profileBtn].forEach(btn => {
+        if (!btn) return;
+        btn.classList.toggle("open",   isOpen);
+        btn.classList.toggle("closed", !isOpen);
+    });
+}
+
+window.toggleShopStatus = async function() {
+    const newStatus = !shopIsOpen;
+    applyShopStatus(newStatus);
+    if (currentUserId) {
+        try {
+            await updateDoc(doc(db, "tailors", currentUserId), { isOpen: newStatus });
+            showToast(newStatus ? "Shop is now Open ✦" : "Shop marked as Closed");
+        } catch (e) {
+            console.error("toggleShopStatus failed:", e.code, e.message);
+            // Revert UI if write failed
+            applyShopStatus(!newStatus);
+            showToast("Could not update shop status. Check your connection.");
+        }
+    } else {
+        showToast("Not logged in — shop status not saved.");
+    }
+};
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+window.handleLogout = async function() {
+    await signOut(auth);
+    window.location.href = "index.html";
+};
+
+</script>
+</body>
+</html>
