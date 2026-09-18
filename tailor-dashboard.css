@@ -1187,3 +1187,27 @@
     border-color: #2b6be6;
     background: #fff;
 }
+
+/* Location input row inside profile form */
+.td-profile-form-card .location-input-row input {
+    flex: 1;
+    padding: 11px 14px;
+    border: 1.5px solid #e7e3da;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #171715;
+    background: #faf9f6;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.td-profile-form-card .location-input-row input:focus {
+    border-color: #2b6be6;
+    background: #fff;
+}
+
+.td-profile-form-card .location-pin-btn {
+    height: 44px;
+    width: 44px;
+}
