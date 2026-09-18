@@ -426,7 +426,6 @@
 
     <!-- Order list -->
     <div class="customer-orders-list" id="customerOrdersList"></div>
-
 </section>
 
 
@@ -602,7 +601,8 @@
         <span class="section-label">PLACE AN ORDER</span>
 
         <h2 id="bookingTitle">Book Tailor</h2>
-        <p id="bookingSubtitle" style="color:#858179;font-size:13px;margin-bottom:20px;"></p>
+        <p id="bookingSubtitle" style="color:#858179;font-size:13px;margin-bottom:4px;"></p>
+        <p id="bookingLocation" style="color:#aaa49a;font-size:12px;margin-bottom:20px;display:none;">📍</p>
 
         <!-- SERVICE CHIPS -->
         <div class="bk-section-label">What do you need?</div>
@@ -687,7 +687,7 @@
             <button class="back-btn" onclick="goBack()">← Back</button>
             <div class="modal-icon">✦</div>
             <span class="section-label" id="loginRoleLabel">CUSTOMER LOGIN</span>
-            <h2>Welcome <em>back.</em></h2>
+            <h2 id="authHeading">Welcome <em>back.</em></h2>
 
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchTab('login')">Log in</button>
@@ -707,6 +707,9 @@
                 <div class="auth-error" id="loginError"></div>
                 <button class="primary-btn auth-submit-btn" onclick="handleLogin()">
                     Log in →
+                </button>
+                <button class="forgot-password-btn" onclick="handleForgotPassword()">
+                    Forgot password?
                 </button>
             </div>
 
@@ -741,6 +744,30 @@
                             <option>Alterations</option>
                             <option>Custom Design</option>
                         </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Shop Locality / Area</label>
+                        <div class="location-input-row">
+                            <input type="text" id="signupLocality" placeholder="e.g. Koramangala, SG Palya">
+                            <button type="button" class="location-pin-btn" onclick="getTailorLocation()" title="Use my current location">📍</button>
+                        </div>
+                        <small id="signupLocationStatus" class="location-status-text">Type your area or pinpoint your location.</small>
+                        <input type="hidden" id="shopLatitude">
+                        <input type="hidden" id="shopLongitude">
+                    </div>
+                    <div class="addr-grid">
+                        <div class="field-group">
+                            <label>Pincode</label>
+                            <input type="text" id="signupPincode" placeholder="e.g. 560034" maxlength="6" oninput="lookupPincode(this.value)">
+                        </div>
+                        <div class="field-group">
+                            <label>City / District</label>
+                            <input type="text" id="signupCity" placeholder="Auto-filled">
+                        </div>
+                        <div class="field-group">
+                            <label>State</label>
+                            <input type="text" id="signupState" placeholder="Auto-filled">
+                        </div>
                     </div>
                 </div>
 
@@ -782,6 +809,7 @@
         getAuth,
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
+        sendPasswordResetEmail,
         signInWithPopup,
         GoogleAuthProvider,
         signOut,
@@ -824,6 +852,20 @@
 
     // Show login prompt in orders section on initial load
     renderCustomerOrders(null);
+
+    // Silently request user location — used for distance display on tailor cards
+    // No blocking, no error shown — just enriches cards if granted
+    let userLocation = null;
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                updateDistancesOnCards();
+            },
+            () => { /* denied — cards just show hours instead */ },
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+        );
+    }
 
     loadTailors();
 
@@ -891,6 +933,12 @@
             const vacationTag  = (tailor.vacationStart && tailor.vacationEnd && new Date().toISOString().slice(0,10) >= tailor.vacationStart && new Date().toISOString().slice(0,10) <= tailor.vacationEnd)
                 ? `<span class="tailor-vacation-tag">🏖️ On vacation</span>` : "";
 
+            // Show only the first segment of location (area name, not full address)
+            const locationShort = tailor.location
+                ? escapeHTML(tailor.location.split(",")[0].trim())
+                : "";
+            const phone = tailor.phone ? escapeHTML(tailor.phone) : "";
+
             return `
                 <div class="tailor-card">
                     <div class="tailor-photo ${photoClass}" id="tphoto-${tailorId}">
@@ -906,17 +954,22 @@
                             <div class="rating">${rating ? `★ ${rating.toFixed(1)}` : "New"}</div>
                         </div>
                         <div class="tailor-tags">
-                            <span>${specialty}</span>
-                            ${tailor.location ? `<span>📍 ${escapeHTML(tailor.location)}</span>` : ""}
+                            ${locationShort ? `<span>📍 ${locationShort}</span>` : ""}
                             ${vacationTag}
                         </div>
                         <div class="tailor-bottom">
-                            <span>⏰ ${escapeHTML(tailor.openingTime || "9:00")}–${escapeHTML(tailor.closingTime || "19:00")}</span>
+                            <span id="tdist-${tailorId}">⏰ ${escapeHTML(tailor.openingTime || "9:00")}–${escapeHTML(tailor.closingTime || "19:00")}</span>
                             <strong>From ₹${price.toLocaleString("en-IN")}</strong>
                         </div>
-                        <button class="book-btn ${unavail ? 'book-btn-closed' : ''}" onclick="openBookingModal('${tailorId}')">
-                            ${bookBtnLabel}
-                        </button>
+                        <div class="tailor-actions">
+                            <button class="book-btn ${unavail ? 'book-btn-closed' : ''}" onclick="openBookingModal('${tailorId}')">
+                                ${bookBtnLabel}
+                            </button>
+                            ${phone ? `<a class="tailor-call-btn" href="tel:${phone}" title="Call ${name}">📞</a>` : ""}
+                            ${tailor.lat && tailor.lng
+                                ? `<button class="visit-shop-btn" onclick="openShopDirections(${tailor.lat}, ${tailor.lng}, '${escapeHTML(name)}')" title="Get directions">📍</button>`
+                                : ""}
+                        </div>
                     </div>
                 </div>`;
         }).join("");
@@ -932,6 +985,9 @@
                 }
             }
         });
+
+        // Show distances if user location already available
+        updateDistancesOnCards();
     }
 
     /* =====================================================
@@ -1115,6 +1171,154 @@
     };
 
     /* =====================================================
+       TAILOR LOCATION — GPS PINPOINT
+    ===================================================== */
+
+    window.getTailorLocation = function() {
+        if (!navigator.geolocation) {
+            showToast("Geolocation is not supported by your browser.");
+            return;
+        }
+        const statusEl = document.getElementById("signupLocationStatus");
+        const btn      = document.querySelector(".location-pin-btn");
+        if (statusEl) statusEl.textContent = "Getting your location...";
+        if (btn)      btn.textContent = "⏳";
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+
+                document.getElementById("shopLatitude").value  = lat;
+                document.getElementById("shopLongitude").value = lng;
+
+                // Reverse geocode to get a human-readable area name
+                try {
+                    const res  = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+                    );
+                    const data = await res.json();
+                    const area = data.address?.suburb
+                        || data.address?.neighbourhood
+                        || data.address?.town
+                        || data.address?.city
+                        || data.address?.county
+                        || "";
+                    const city = data.address?.city || data.address?.state_district || "";
+                    const label = [area, city].filter(Boolean).join(", ");
+
+                    // Fill structured address fields
+                    const localityEl = document.getElementById("signupLocality");
+                    const cityEl     = document.getElementById("signupCity");
+                    const stateEl    = document.getElementById("signupState");
+                    const pincodeEl  = document.getElementById("signupPincode");
+                    if (localityEl && !localityEl.value) localityEl.value = area;
+                    if (cityEl     && !cityEl.value)     cityEl.value     = city;
+                    if (stateEl    && !stateEl.value)    stateEl.value    = data.address?.state || "";
+                    if (pincodeEl  && !pincodeEl.value)  pincodeEl.value  = data.address?.postcode || "";
+
+                    if (statusEl) statusEl.textContent = `📍 ${label || `${lat.toFixed(4)}, ${lng.toFixed(4)}`}`;
+                    if (statusEl) statusEl.style.color = "#22b573";
+                } catch {
+                    if (statusEl) statusEl.textContent = `📍 Location pinpointed (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                    if (statusEl) statusEl.style.color = "#22b573";
+                }
+
+                if (btn) btn.textContent = "✓";
+                showToast("Location pinpointed ✦");
+            },
+            (err) => {
+                if (btn) btn.textContent = "📍";
+                const msg = err.code === 1 ? "Location access denied." : "Could not get location.";
+                if (statusEl) { statusEl.textContent = msg; statusEl.style.color = "#e64c2b"; }
+                showToast(msg);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    };
+
+    /* =====================================================
+       PINCODE LOOKUP — India Post API (free, no key needed)
+    ===================================================== */
+
+    window.lookupPincode = async function(pin) {
+        if (pin.length !== 6 || !/^\d{6}$/.test(pin)) return;
+        const cityEl  = document.getElementById("signupCity");
+        const stateEl = document.getElementById("signupState");
+        if (cityEl)  cityEl.placeholder  = "Looking up...";
+        if (stateEl) stateEl.placeholder = "Looking up...";
+        try {
+            const res  = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+            const json = await res.json();
+            if (json[0]?.Status === "Success") {
+                const post = json[0].PostOffice[0];
+                if (cityEl)  { cityEl.value  = post.District || post.Division || ""; cityEl.placeholder  = "City / District"; }
+                if (stateEl) { stateEl.value = post.State || "";                     stateEl.placeholder = "State"; }
+            } else {
+                if (cityEl)  cityEl.placeholder  = "City / District";
+                if (stateEl) stateEl.placeholder = "State";
+            }
+        } catch {
+            if (cityEl)  cityEl.placeholder  = "City / District";
+            if (stateEl) stateEl.placeholder = "State";
+        }
+    };
+
+    /* =====================================================
+       VISIT SHOP — open Google Maps directions from user location
+    ===================================================== */
+
+    window.openShopDirections = function(shopLat, shopLng, shopName) {
+        if (!navigator.geolocation) {
+            window.open(`https://www.google.com/maps?q=${shopLat},${shopLng}`, "_blank");
+            return;
+        }
+        showToast("Getting your location...");
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const url = `https://www.google.com/maps/dir/?api=1` +
+                    `&origin=${pos.coords.latitude},${pos.coords.longitude}` +
+                    `&destination=${shopLat},${shopLng}` +
+                    `&travelmode=driving`;
+                window.open(url, "_blank");
+            },
+            () => {
+                window.open(`https://www.google.com/maps?q=${shopLat},${shopLng}`, "_blank");
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+    };
+
+    /* =====================================================
+       DISTANCE HELPERS
+    ===================================================== */
+
+    function haversineKm(lat1, lng1, lat2, lng2) {
+        const R    = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a    = Math.sin(dLat / 2) ** 2
+                   + Math.cos(lat1 * Math.PI / 180)
+                   * Math.cos(lat2 * Math.PI / 180)
+                   * Math.sin(dLng / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function updateDistancesOnCards() {
+        if (!userLocation) return;
+        allTailors.forEach(tailor => {
+            if (!tailor.lat || !tailor.lng) return;
+            const el = document.getElementById("tdist-" + tailor.id);
+            if (!el) return;
+            const km  = haversineKm(userLocation.lat, userLocation.lng, tailor.lat, tailor.lng);
+            const label = km < 1
+                ? `📍 ${Math.round(km * 1000)} m away`
+                : `📍 ${km.toFixed(1)} km away`;
+            el.textContent = label;
+        });
+    }
+
+    /* =====================================================
        CUSTOMER ORDERS — LIVE LISTENER
     ===================================================== */
 
@@ -1182,27 +1386,44 @@
     }
 
     const STATUS_CONFIG = {
-        "pending":     { cls: "orange", label: "Pending",     icon: "⏳", desc: "Waiting for tailor to accept" },
-        "in-progress": { cls: "blue",   label: "In Progress", icon: "✂️", desc: "Your tailor is working on it" },
-        "completed":   { cls: "green",  label: "Completed",   icon: "✓",  desc: "Ready for pickup / delivered" },
-        "cancelled":   { cls: "red",    label: "Rejected",    icon: "✕",  desc: "The tailor couldn't take this order" },
+        "pending":            { cls: "orange", label: "Pending",            icon: "⏳", desc: "Waiting for tailor to accept" },
+        "in-progress":        { cls: "blue",   label: "In Progress",        icon: "✂️", desc: "Your tailor is working on it" },
+        "completed":          { cls: "green",  label: "Completed",          icon: "✓",  desc: "Ready for pickup / delivered" },
+        "cancelled":          { cls: "red",    label: "Rejected",           icon: "✕",  desc: "The tailor couldn't take this order" },
+        "customer-cancelled": { cls: "red",    label: "Cancelled by you",   icon: "✕",  desc: "You cancelled this order" },
     };
 
     function buildOrderCard(o) {
-        const cfg      = STATUS_CONFIG[o.status] || { cls: "grey", label: o.status, icon: "•", desc: "" };
-        const dateStr  = o.createdAt?.toDate
+        const cfg     = STATUS_CONFIG[o.status] || { cls: "grey", label: o.status, icon: "•", desc: "" };
+        const dateStr = o.createdAt?.toDate
             ? o.createdAt.toDate().toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" })
             : (o.date || "—");
-        const amount   = o.amount ? "₹" + Number(o.amount).toLocaleString("en-IN") : "";
+        const amount  = o.amount ? "₹" + Number(o.amount).toLocaleString("en-IN") : "";
+
+        // 2-minute cancellation window — only for pending orders
+        const CANCEL_WINDOW_MS = 2 * 60 * 1000;
+        let cancelHtml = "";
+        if (o.status === "pending" && o.createdAt?.toDate) {
+            const ageMs = Date.now() - o.createdAt.toDate().getTime();
+            if (ageMs < CANCEL_WINDOW_MS) {
+                const secsLeft = Math.ceil((CANCEL_WINDOW_MS - ageMs) / 1000);
+                cancelHtml = `
+                    <div class="co-cancel-row">
+                        <button class="co-cancel-btn" onclick="cancelOrder('${o.id}')" id="cancel-${o.id}">
+                            Cancel order
+                        </button>
+                        <span class="co-cancel-timer" id="timer-${o.id}">${secsLeft}s left</span>
+                    </div>`;
+            }
+        }
 
         // Rating UI — only for completed orders
         let ratingHtml = "";
         if (o.status === "completed") {
             if (o.rating) {
-                // Already rated
                 ratingHtml = `
                     <div class="co-rating-done">
-                        ${"★".repeat(o.rating)}${"☆".repeat(5 - o.rating)}
+                        <span class="co-stars-display">${"★".repeat(o.rating)}${"☆".repeat(5 - o.rating)}</span>
                         <span>Your rating</span>
                     </div>`;
             } else {
@@ -1221,17 +1442,36 @@
 
         return `
         <div class="co-card co-${cfg.cls}">
-            <div class="co-card-top">
-                <div class="co-status-row">
-                    <span class="co-status-badge co-${cfg.cls}">${cfg.icon} ${cfg.label}</span>
-                    <span class="co-date">${dateStr}</span>
+            <div class="co-card-header co-header-${cfg.cls}">
+                <div class="co-header-left">
+                    <span class="co-status-icon">${cfg.icon}</span>
+                    <div>
+                        <div class="co-status-label">${cfg.label}</div>
+                        <div class="co-date">${dateStr}</div>
+                    </div>
                 </div>
-                <div class="co-tailor-row">
-                    <strong>${escapeHTML(o.tailorShop || o.tailorName || "Tailor")}</strong>
-                    <span class="co-amount">${amount}</span>
+                <div class="co-amount">${amount}</div>
+            </div>
+            <div class="co-card-body">
+                <div class="co-tailor-name">${escapeHTML(o.tailorShop || o.tailorName || "Tailor")}</div>
+                <div class="co-meta-row">
+                    <span class="co-service-tag">${escapeHTML(o.service || "Tailoring")}</span>
+                    <span class="co-order-id">#${o.id.slice(-6).toUpperCase()}</span>
                 </div>
-                <div class="co-service-tag">${escapeHTML(o.service || "Tailoring")}</div>
                 ${cfg.desc ? `<p class="co-status-desc">${cfg.desc}</p>` : ""}
+                <div class="co-progress-track">
+                    <div class="co-progress-step ${['pending','in-progress','completed'].includes(o.status) ? 'done' : ''}">
+                        <span></span><small>Placed</small>
+                    </div>
+                    <div class="co-progress-line ${['in-progress','completed'].includes(o.status) ? 'done' : ''}"></div>
+                    <div class="co-progress-step ${['in-progress','completed'].includes(o.status) ? 'done' : ''}">
+                        <span></span><small>Accepted</small>
+                    </div>
+                    <div class="co-progress-line ${o.status === 'completed' ? 'done' : ''}"></div>
+                    <div class="co-progress-step ${o.status === 'completed' ? 'done' : ''}">
+                        <span></span><small>Done</small>
+                    </div>
+                </div>
             </div>
             ${o.description ? `
             <div class="co-detail">
@@ -1244,18 +1484,43 @@
                 <p>${escapeHTML(o.measurements)}</p>
             </div>` : ""}
             ${ratingHtml}
+            ${cancelHtml}
         </div>`;
     }
 
     window.submitRating = async function(orderId, stars) {
         try {
             await updateDoc(doc(db, "orders", orderId), { rating: stars });
-            // Listener will auto-refresh the card
         } catch (err) {
             showToast("Could not save rating. Please try again.");
             console.error(err);
         }
     };
+
+    window.cancelOrder = async function(orderId) {
+        try {
+            await updateDoc(doc(db, "orders", orderId), { status: "customer-cancelled" });
+            showToast("Order cancelled.");
+        } catch (err) {
+            showToast("Could not cancel. Please try again.");
+            console.error(err);
+        }
+    };
+
+    // Live countdown timers — tick every second, remove cancel button when window expires
+    setInterval(() => {
+        document.querySelectorAll(".co-cancel-timer").forEach(timerEl => {
+            const orderId  = timerEl.id.replace("timer-", "");
+            const cancelBtn = document.getElementById("cancel-" + orderId);
+            const row       = timerEl.closest(".co-cancel-row");
+            const secsLeft  = parseInt(timerEl.textContent) - 1;
+            if (secsLeft <= 0) {
+                if (row) row.remove();
+            } else {
+                timerEl.textContent = secsLeft + "s left";
+            }
+        });
+    }, 1000);
 
     // Star hover effect — delegate from document
     document.addEventListener("mouseover", (e) => {
@@ -1309,8 +1574,23 @@
         const name      = bookingTailor.shop || bookingTailor.name || "Tailor";
         const specialty = bookingTailor.specialty || "Tailoring";
 
-        document.getElementById("bookingTitle").textContent = name;
+        document.getElementById("bookingTitle").textContent    = name;
         document.getElementById("bookingSubtitle").textContent = specialty;
+
+        // Show full address in booking modal
+        const locFull = document.getElementById("bookingLocation");
+        if (locFull) {
+            const addr = bookingTailor.address;
+            const parts = addr
+                ? [addr.locality, addr.city, addr.state, addr.pincode].filter(Boolean)
+                : [bookingTailor.location].filter(Boolean);
+            if (parts.length) {
+                locFull.textContent   = "📍 " + parts.join(", ");
+                locFull.style.display = "block";
+            } else {
+                locFull.style.display = "none";
+            }
+        }
 
         // Pre-select service chip that matches specialty
         document.querySelectorAll(".bk-service-chip").forEach(chip => {
@@ -1394,6 +1674,9 @@
             specialty: data.specialty || "Tailoring",
             phone: data.phone || "",
             location: data.location || "",
+            address:  data.address  || {},
+            lat: data.lat || null,
+            lng: data.lng || null,
             bio: data.bio || "",
             photoURL: data.photoURL || "",
             startingPrice: Number(data.startingPrice || 150),
@@ -1443,16 +1726,26 @@
         currentRole = role;
         document.getElementById("stepRole").style.display  = "none";
         document.getElementById("stepLogin").style.display = "block";
-        document.getElementById("loginRoleLabel").textContent =
-            role === "tailor" ? "TAILOR LOGIN" : "CUSTOMER LOGIN";
 
         // show/hide tailor-specific signup fields
         document.getElementById("tailorFields").style.display =
             role === "tailor" ? "block" : "none";
 
-        // go to the pending tab
+        // go to the pending tab — this will set heading + label
         switchTab(window._pendingTab || "login");
     };
+
+    function updateAuthLabels(tab) {
+        const isLogin  = tab === "login";
+        const isTailor = currentRole === "tailor";
+        const roleWord = isTailor ? "TAILOR" : "CUSTOMER";
+        document.getElementById("loginRoleLabel").textContent =
+            isLogin ? `${roleWord} LOGIN` : `${roleWord} SIGN UP`;
+        const heading = document.getElementById("authHeading");
+        if (heading) heading.innerHTML = isLogin
+            ? `Welcome <em>back.</em>`
+            : `Create your <em>account.</em>`;
+    }
 
     window.goBack = function() {
         document.getElementById("stepLogin").style.display = "none";
@@ -1465,6 +1758,7 @@
         tabs[1].classList.toggle("active", tab === "signup");
         document.getElementById("loginFields").style.display  = tab === "login"  ? "block" : "none";
         document.getElementById("signupFields").style.display = tab === "signup" ? "block" : "none";
+        updateAuthLabels(tab);
         clearErrors();
     };
 
@@ -1501,8 +1795,8 @@
 
             if (storedRole !== currentRole) {
                 await signOut(auth);
-                showError("loginError",
-                    `This account is registered as a ${storedRole}. Please select the correct role.`);
+                // Generic error — don't reveal which role the account belongs to
+                showError("loginError", "Incorrect email or password.");
                 return;
             }
 
@@ -1519,6 +1813,26 @@
     };
 
     /* =====================================================
+       AUTH — FORGOT PASSWORD
+    ===================================================== */
+
+    window.handleForgotPassword = async function() {
+        const email = document.getElementById("loginEmail").value.trim();
+        if (!email) {
+            showError("loginError", "Enter your email above, then click Forgot password.");
+            return;
+        }
+        try {
+            await sendPasswordResetEmail(auth, email);
+            showError("loginError", ""); // clear any error
+            showToast("Password reset email sent — check your inbox.");
+        } catch (err) {
+            // Don't reveal whether email exists — always show same message
+            showToast("If that email is registered, a reset link has been sent.");
+        }
+    };
+
+    /* =====================================================
        AUTH — EMAIL SIGNUP
     ===================================================== */
 
@@ -1529,6 +1843,16 @@
         const password = document.getElementById("signupPassword").value;
         const shop     = document.getElementById("signupShop")?.value.trim();
         const specialty= document.getElementById("signupSpecialty")?.value;
+        const locality = document.getElementById("signupLocality")?.value.trim() || "";
+        const pincode  = document.getElementById("signupPincode")?.value.trim() || "";
+        const city     = document.getElementById("signupCity")?.value.trim() || "";
+        const state    = document.getElementById("signupState")?.value.trim() || "";
+        const lat      = parseFloat(document.getElementById("shopLatitude")?.value) || null;
+        const lng      = parseFloat(document.getElementById("shopLongitude")?.value) || null;
+        // Short display label: "Koramangala, Bangalore"
+        const location = [locality, city].filter(Boolean).join(", ");
+        // Full structured address stored separately
+        const address  = { locality, city, state, pincode };
 
         if (!name || !email || !phone || !password) {
             showError("signupError", "Please fill in all required fields.");
@@ -1563,7 +1887,11 @@
                 const tailorData = {
                     ...userData,
                     shop,
-                    specialty
+                    specialty,
+                    location,
+                    address,
+                    lat,
+                    lng
                 };
 
                 await setDoc(doc(db, "users", cred.user.uid), accountData);
