@@ -351,8 +351,26 @@
                         </select>
                     </div>
                     <div class="field-group">
-                        <label>Location</label>
-                        <input type="text" id="pLocation" placeholder="Area, city">
+                        <label>Locality / Area</label>
+                        <div class="location-input-row">
+                            <input type="text" id="pLocation" placeholder="e.g. Koramangala, SG Palya">
+                            <button type="button" class="location-pin-btn" onclick="pinTailorLocation()" title="Pinpoint my current location">📍</button>
+                        </div>
+                        <small id="pLocationStatus" class="location-status-text"></small>
+                        <input type="hidden" id="pLat">
+                        <input type="hidden" id="pLng">
+                    </div>
+                    <div class="field-group">
+                        <label>Pincode</label>
+                        <input type="text" id="pPincode" placeholder="e.g. 560034" maxlength="6" oninput="lookupPincodeProfile(this.value)">
+                    </div>
+                    <div class="field-group">
+                        <label>City / District</label>
+                        <input type="text" id="pCity" placeholder="Auto-filled from pincode">
+                    </div>
+                    <div class="field-group">
+                        <label>State</label>
+                        <input type="text" id="pState" placeholder="Auto-filled from pincode">
                     </div>
                     <div class="field-group" style="grid-column: 1 / -1;">
                         <label>About your shop</label>
@@ -673,7 +691,16 @@ function applyTailorData(d) {
     if (document.getElementById("pEmail"))     document.getElementById("pEmail").value     = d.email || "";
     if (document.getElementById("pPhone"))     document.getElementById("pPhone").value     = d.phone || "";
     if (document.getElementById("pSpecialty")) document.getElementById("pSpecialty").value = d.specialty || "";
-    if (document.getElementById("pLocation"))  document.getElementById("pLocation").value  = d.location || "";
+    if (document.getElementById("pLocation"))  document.getElementById("pLocation").value  = d.location || d.address?.locality || "";
+    if (document.getElementById("pPincode"))   document.getElementById("pPincode").value   = d.address?.pincode || "";
+    if (document.getElementById("pCity"))      document.getElementById("pCity").value      = d.address?.city    || "";
+    if (document.getElementById("pState"))     document.getElementById("pState").value     = d.address?.state   || "";
+    if (document.getElementById("pLat"))       document.getElementById("pLat").value       = d.lat || "";
+    if (document.getElementById("pLng"))       document.getElementById("pLng").value       = d.lng || "";
+    if (d.lat && d.lng) {
+        const statusEl = document.getElementById("pLocationStatus");
+        if (statusEl) { statusEl.textContent = `📍 Location saved`; statusEl.style.color = "#22b573"; }
+    }
     if (document.getElementById("pBio"))      document.getElementById("pBio").value      = d.bio || "";
     if (document.getElementById("pOpen"))     document.getElementById("pOpen").value     = d.openingTime || "09:00";
     if (document.getElementById("pClose"))    document.getElementById("pClose").value    = d.closingTime || "19:00";
@@ -1274,12 +1301,20 @@ window.saveProfile = async function() {
         email: document.getElementById("pEmail").value.trim(),
         specialty: document.getElementById("pSpecialty").value,
         location: document.getElementById("pLocation").value.trim(),
+        address: {
+            locality: document.getElementById("pLocation").value.trim(),
+            pincode:  document.getElementById("pPincode")?.value.trim() || "",
+            city:     document.getElementById("pCity")?.value.trim()    || "",
+            state:    document.getElementById("pState")?.value.trim()   || "",
+        },
         bio: document.getElementById("pBio").value.trim(),
         openingTime: document.getElementById("pOpen").value,
         closingTime: document.getElementById("pClose").value,
         workingDays: [...activeDays],
         vacationStart: document.getElementById("pVacationStart")?.value || "",
         vacationEnd:   document.getElementById("pVacationEnd")?.value   || "",
+        lat: parseFloat(document.getElementById("pLat")?.value) || tailorData.lat || null,
+        lng: parseFloat(document.getElementById("pLng")?.value) || tailorData.lng || null,
     };
 
     if (!profile.name || !profile.shop) {
@@ -1296,10 +1331,15 @@ window.saveProfile = async function() {
             specialty: profile.specialty,
             phone: profile.phone,
             location: profile.location,
+            address:  profile.address || {},
             bio: profile.bio,
             openingTime: profile.openingTime,
             closingTime: profile.closingTime,
-            workingDays: profile.workingDays,
+            workingDays:   profile.workingDays,
+            vacationStart: profile.vacationStart || "",
+            vacationEnd:   profile.vacationEnd   || "",
+            lat:           profile.lat,
+            lng:           profile.lng,
             updatedAt: new Date().toISOString()
         }, { merge: true });
 
@@ -1427,6 +1467,88 @@ window.clearVacation = async function() {
             showToast("Vacation cleared ✦");
         } catch (e) { console.warn(e); }
     }
+};
+
+/* =========================================================
+   PINCODE LOOKUP — PROFILE
+========================================================= */
+window.lookupPincodeProfile = async function(pin) {
+    if (pin.length !== 6 || !/^\d{6}$/.test(pin)) return;
+    const cityEl  = document.getElementById("pCity");
+    const stateEl = document.getElementById("pState");
+    if (cityEl)  cityEl.placeholder  = "Looking up...";
+    if (stateEl) stateEl.placeholder = "Looking up...";
+    try {
+        const res  = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+        const json = await res.json();
+        if (json[0]?.Status === "Success") {
+            const post = json[0].PostOffice[0];
+            if (cityEl)  { cityEl.value  = post.District || post.Division || ""; cityEl.placeholder  = "City / District"; }
+            if (stateEl) { stateEl.value = post.State || "";                     stateEl.placeholder = "State"; }
+        } else {
+            if (cityEl)  cityEl.placeholder  = "City / District";
+            if (stateEl) stateEl.placeholder = "State";
+        }
+    } catch {
+        if (cityEl)  cityEl.placeholder  = "City / District";
+        if (stateEl) stateEl.placeholder = "State";
+    }
+};
+
+/* =========================================================
+   LOCATION PINPOINT — PROFILE
+========================================================= */
+window.pinTailorLocation = function() {
+    if (!navigator.geolocation) {
+        showToast("Geolocation not supported by your browser.");
+        return;
+    }
+    const statusEl = document.getElementById("pLocationStatus");
+    const btn      = document.querySelector("#pLocation").closest(".location-input-row")
+                        ?.querySelector(".location-pin-btn");
+    if (statusEl) { statusEl.textContent = "Getting your location..."; statusEl.style.color = "#858179"; }
+    if (btn)      btn.textContent = "⏳";
+
+    navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            document.getElementById("pLat").value = lat;
+            document.getElementById("pLng").value = lng;
+
+            // Reverse geocode via Nominatim (free, no API key)
+            try {
+                const res  = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+                );
+                const data = await res.json();
+                const area   = data.address?.suburb || data.address?.neighbourhood || data.address?.town || data.address?.city || "";
+                const city   = data.address?.city || data.address?.state_district || "";
+                const label  = [area, city].filter(Boolean).join(", ");
+                const locEl  = document.getElementById("pLocation");
+                const cityEl = document.getElementById("pCity");
+                const stateEl= document.getElementById("pState");
+                const pinEl  = document.getElementById("pPincode");
+                if (locEl  && area)                  locEl.value   = area;
+                if (cityEl && !cityEl.value)         cityEl.value  = city;
+                if (stateEl && !stateEl.value)       stateEl.value = data.address?.state || "";
+                if (pinEl   && !pinEl.value)         pinEl.value   = data.address?.postcode || "";
+                if (statusEl) { statusEl.textContent = `📍 ${label || `${lat.toFixed(4)}, ${lng.toFixed(4)}`}`; statusEl.style.color = "#22b573"; }
+            } catch {
+                if (statusEl) { statusEl.textContent = `📍 Pinpointed (${lat.toFixed(4)}, ${lng.toFixed(4)})`; statusEl.style.color = "#22b573"; }
+            }
+            if (btn) btn.textContent = "✓";
+            showToast("Location pinpointed — save your profile to update ✦");
+        },
+        (err) => {
+            if (btn) btn.textContent = "📍";
+            const msg = err.code === 1 ? "Location access denied." : "Could not get location.";
+            if (statusEl) { statusEl.textContent = msg; statusEl.style.color = "#e64c2b"; }
+            showToast(msg);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
 };
 
 /* =========================================================
