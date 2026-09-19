@@ -550,18 +550,22 @@ onAuthStateChanged(auth, async (user) => {
     }
     try {
         await setDoc(doc(db, "tailors", user.uid), {
-            uid: user.uid,
-            name: tailorData.name || "",
-            email: tailorData.email,
-            shop: tailorData.shop || tailorData.name || "Tailor",
-            specialty: tailorData.specialty || "Tailoring",
-            phone: tailorData.phone || "",
-            location: tailorData.location || "",
-            bio: tailorData.bio || "",
-            photoURL: tailorData.photoURL || "",
+            uid:          user.uid,
+            name:         tailorData.name || "",
+            email:        tailorData.email,
+            shop:         tailorData.shop || tailorData.name || "Tailor",
+            specialty:    tailorData.specialty || "Tailoring",
+            phone:        tailorData.phone || "",
+            location:     tailorData.location || "",
+            address:      tailorData.address || {},
+            lat:          tailorData.lat || null,
+            lng:          tailorData.lng || null,
+            bio:          tailorData.bio || "",
             startingPrice: Number(tailorData.startingPrice || 150),
-            rating: Number(tailorData.rating || 0),
-            updatedAt: new Date().toISOString()
+            rating:       Number(tailorData.rating || 0),
+            updatedAt:    new Date().toISOString()
+            // NOTE: photoURL intentionally omitted — only written by saveProfile
+            // to avoid overwriting a previously saved photo on login
         }, { merge: true });
     } catch (listingError) {
         console.error("Tailor listing sync failed:", listingError);
@@ -1348,7 +1352,8 @@ window.saveProfile = async function() {
             const photoURL = await uploadPhoto(pendingPhotoFile, currentUserId);
             await setDoc(doc(db, "tailors", currentUserId), { photoURL }, { merge: true });
             savedPhotoURL = photoURL;
-            pendingPhotoFile = null;
+            pendingPhotoFile    = null;
+            pendingPhotoDataURL = null;
         }
 
         tailorData = { ...tailorData, ...profile };
@@ -1364,11 +1369,13 @@ window.saveProfile = async function() {
 /* =========================================================
    CHANGE PHOTO
 ========================================================= */
+// Store the base64 preview so we can use it as fallback without re-reading the file
+let pendingPhotoDataURL = null;
+
 window.handlePhotoChange = function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate — image only, max 5MB
     if (!file.type.startsWith("image/")) {
         showToast("Please select an image file.");
         return;
@@ -1381,73 +1388,89 @@ window.handlePhotoChange = function(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         const src = e.target.result;
+
+        // Store the data URL for use in saveProfile
+        pendingPhotoDataURL = src;
+
         const avatar = document.getElementById("profileBigAvatar");
+        avatar.innerHTML = `<img src="${src}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
 
-        // Swap text initial for actual image
-        avatar.innerHTML = `<img src="${src}" alt="Profile photo" style="
-            width:100%; height:100%; object-fit:cover;
-            border-radius:50%; display:block;">`;
-
-        // Also update the sidebar avatar letter → image
         const sidebarAvatar = document.querySelector(".td-profile-avatar");
-        if (sidebarAvatar) {
-            sidebarAvatar.innerHTML = `<img src="${src}" alt="Profile photo" style="
-                width:100%; height:100%; object-fit:cover;
-                border-radius:50%; display:block;">`;
-        }
+        if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${src}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
 
-        // Update mobile topbar avatar too
         const topbarAvatar = document.getElementById("topbarAvatar");
-        if (topbarAvatar) {
-            topbarAvatar.innerHTML = `<img src="${src}" alt="Profile photo" style="
-                width:100%; height:100%; object-fit:cover;
-                border-radius:50%; display:block;">`;
-        }
-
-        showToast("Photo updated ✦");
+        if (topbarAvatar) topbarAvatar.innerHTML = `<img src="${src}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">`;
 
         pendingPhotoFile = file;
-        showToast("Photo ready. Click Save Changes to save it.");
+        showToast("Photo ready — click Save Changes to update ✦");
     };
     reader.readAsDataURL(file);
-
-    // Reset input so same file can be picked again
     event.target.value = "";
 };
 
 async function uploadPhoto(file, uid) {
+    // 1. Try Firebase Storage (proper URL, no size limit concern)
     try {
         const { getStorage, ref, uploadBytes, getDownloadURL } =
             await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
-
         const storage  = getStorage(app);
         const photoRef = ref(storage, `avatars/${uid}`);
         await uploadBytes(photoRef, file);
         const url = await getDownloadURL(photoRef);
-
+        console.log("Photo uploaded to Storage:", url.slice(0, 60));
         return url;
-    } catch (err) {
+    } catch (storageErr) {
+        console.warn("Storage upload failed, using base64 fallback:", storageErr.message);
+    }
+
+    // 2. Fallback — use the already-read data URL, resized small enough for Firestore
+    // We already have pendingPhotoDataURL from handlePhotoChange
+    if (pendingPhotoDataURL) {
         try {
-            const dataURL = await resizeImage(file);
-            return dataURL;
-        } catch (fallbackError) {
-            console.error("Photo save failed:", fallbackError);
-            throw fallbackError;
+            const resized = await resizeDataURL(pendingPhotoDataURL, 256, 0.7);
+            console.log("Using resized base64, length:", resized.length);
+            return resized;
+        } catch (e) {
+            console.warn("Resize failed:", e);
         }
+    }
+
+    // 3. Last resort — resize from file
+    try {
+        return await resizeImage(file, 256, 0.7);
+    } catch (e) {
+        console.error("All photo upload methods failed:", e);
+        throw e;
     }
 }
 
-function resizeImage(file) {
+// Resize an existing data URL (faster than re-reading from file)
+function resizeDataURL(dataURL, maxSize, quality) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const scale  = Math.min(maxSize / img.width, maxSize / img.height, 1);
+            const canvas = document.createElement("canvas");
+            canvas.width  = Math.max(1, Math.round(img.width  * scale));
+            canvas.height = Math.max(1, Math.round(img.height * scale));
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = reject;
+        img.src = dataURL;
+    });
+}
+
+function resizeImage(file, maxSize = 320, quality = 0.78) {
     return new Promise((resolve, reject) => {
         const image = new Image();
         image.onload = () => {
-            const size = 320;
-            const scale = Math.min(size / image.width, size / image.height, 1);
+            const scale = Math.min(maxSize / image.width, maxSize / image.height, 1);
             const canvas = document.createElement("canvas");
             canvas.width = Math.max(1, Math.round(image.width * scale));
             canvas.height = Math.max(1, Math.round(image.height * scale));
             canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL("image/jpeg", 0.78));
+            resolve(canvas.toDataURL("image/jpeg", quality));
         };
         image.onerror = reject;
         image.src = URL.createObjectURL(file);
