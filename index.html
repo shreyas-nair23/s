@@ -976,13 +976,17 @@
 
         // Apply photos
         tailors.forEach((tailor) => {
+            const el = document.getElementById("tphoto-" + tailor.id);
+            if (!el) return;
             if (tailor.photoURL) {
-                const el = document.getElementById("tphoto-" + tailor.id);
-                if (el) {
-                    el.style.backgroundImage  = `url("${String(tailor.photoURL).replace(/"/g, '\\"')}")`;
-                    el.style.backgroundSize   = "cover";
-                    el.style.backgroundPosition = "center";
-                }
+                el.style.backgroundImage    = `url("${String(tailor.photoURL).replace(/"/g, '\\"')}")`;
+                el.style.backgroundSize     = "cover";
+                el.style.backgroundPosition = "center";
+                // hide the decorative ✦ overlay when a real photo is present
+                el.classList.add("has-photo");
+            } else {
+                el.style.backgroundImage = "";
+                el.classList.remove("has-photo");
             }
         });
 
