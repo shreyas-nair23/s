@@ -614,6 +614,10 @@ h2 em {
     color: rgba(255,255,255,.35);
 }
 
+.tailor-photo.has-photo::after {
+    display: none;
+}
+
 .verified {
     position: absolute;
     z-index: 2;
